@@ -22,9 +22,15 @@ const routes = [
       { path: 'profile', name: 'UserProfile', component: () => import('@/views/user/UserProfileView.vue'), meta: { requiresAuth: true } },
       { path: 'favorites', name: 'Favorites', component: () => import('@/views/product/FavoritesView.vue'), meta: { requiresAuth: true } },
       { path: 'order/:id', name: 'OrderDetail', component: () => import('@/views/order/OrderDetailView.vue'), meta: { requiresAuth: true } },
+      { path: 'order/:id/tracking', name: 'OrderTracking', component: () => import('@/views/order/TrackingView.vue'), meta: { requiresAuth: true } },
       { path: 'refund/apply/:orderId', name: 'RefundApply', component: () => import('@/views/order/RefundApplyView.vue'), meta: { requiresAuth: true } },
       { path: 'refunds', name: 'RefundList', component: () => import('@/views/order/RefundListView.vue'), meta: { requiresAuth: true } },
       { path: 'coupons', name: 'MyCoupons', component: () => import('@/views/coupon/MyCouponsView.vue'), meta: { requiresAuth: true } },
+      { path: 'notifications', name: 'Notifications', component: () => import('@/views/notification/NotificationListView.vue'), meta: { requiresAuth: true } },
+      // 🆕 Phase 4：社交拼团 + 会员积分
+      { path: 'group-buy', name: 'GroupBuyZone', component: () => import('@/views/groupbuy/GroupBuyZoneView.vue') },
+      { path: 'group-buy/record/:id', name: 'GroupRecord', component: () => import('@/views/groupbuy/GroupRecordView.vue'), meta: { requiresAuth: true } },
+      { path: 'points', name: 'PointsCenter', component: () => import('@/views/user/PointsCenterView.vue'), meta: { requiresAuth: true } },
     ]
   },
   {
@@ -41,6 +47,7 @@ const routes = [
       { path: 'dashboard', name: 'MerchantDashboard', component: () => import('@/views/merchant/MerchantDashboardView.vue') },
       { path: 'refunds', name: 'MerchantRefunds', component: () => import('@/views/merchant/MerchantRefundsView.vue') },
       { path: 'coupons', name: 'MerchantCoupons', component: () => import('@/views/merchant/MerchantCouponsView.vue') },
+      { path: 'group-buy', name: 'MerchantGroupBuy', component: () => import('@/views/merchant/MerchantGroupBuyView.vue') },
     ]
   },
   { path: '/login', name: 'Login', component: () => import('@/views/auth/LoginView.vue') },

@@ -7,12 +7,16 @@ const service = axios.create({
   timeout: 15000
 })
 
-// 请求拦截器 - 注入JWT Token
+// 请求拦截器 - 注入JWT Token + Accept-Language（Phase 3 F5：商品文案随语言返回）
 service.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token')
     if (token) {
       config.headers['Authorization'] = token
+    }
+    const locale = localStorage.getItem('locale')
+    if (locale) {
+      config.headers['Accept-Language'] = locale
     }
     return config
   },

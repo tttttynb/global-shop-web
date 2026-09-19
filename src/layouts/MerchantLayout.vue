@@ -28,6 +28,10 @@
             <el-icon><Ticket /></el-icon>
             <span>优惠券管理</span>
           </el-menu-item>
+          <el-menu-item index="/merchant/group-buy">
+            <el-icon><UserFilled /></el-icon>
+            <span>拼团活动</span>
+          </el-menu-item>
           <el-menu-item index="/merchant/live/create">
             <el-icon><VideoCamera /></el-icon>
             <span>创建直播</span>

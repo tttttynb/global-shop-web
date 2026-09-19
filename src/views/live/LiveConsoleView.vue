@@ -93,6 +93,79 @@
         </el-table>
       </el-card>
 
+      <!-- 🆕 闪购秒杀（Phase 2 - F3） -->
+      <el-card class="console-card flash-sale-card">
+        <template #header>
+          <div class="card-header">
+            <span>⚡ 闪购秒杀</span>
+            <el-tag v-if="activeSale" type="danger" effect="dark">进行中</el-tag>
+          </div>
+        </template>
+
+        <!-- 进行中的秒杀 -->
+        <div v-if="activeSale" class="active-sale">
+          <div class="active-sale-info">
+            <div class="active-sale-name">{{ activeSale.productName }}</div>
+            <div class="active-sale-meta">
+              秒杀价 <strong class="fs-price">¥{{ Number(activeSale.flashPrice).toFixed(2) }}</strong>
+              <span class="fs-original">原价 ¥{{ Number(activeSale.originalPrice).toFixed(2) }}</span>
+            </div>
+            <el-progress
+              :percentage="activeSale.soldPercent || 0"
+              :stroke-width="12"
+              color="#ff4d4f"
+              style="margin: 8px 0 4px;"
+            />
+            <div class="active-sale-meta">
+              已抢 {{ activeSale.soldPercent || 0 }}% ｜ 剩余 {{ activeSale.remainQty }}/{{ activeSale.totalQty }} 件
+            </div>
+          </div>
+          <el-button
+            type="danger"
+            plain
+            :loading="fsCancelLoading"
+            @click="handleCancelFlashSale"
+          >终止秒杀</el-button>
+        </div>
+
+        <!-- 发起新秒杀 -->
+        <el-form v-else label-width="90px" :disabled="liveRoom.status !== 1">
+          <el-form-item label="秒杀商品">
+            <el-select v-model="fsForm.productId" placeholder="从直播间商品中选择" style="width: 100%;" @change="onFsProductChange">
+              <el-option
+                v-for="p in (liveRoom.products || [])"
+                :key="p.productId"
+                :label="`${p.productName}（¥${p.price} / 库存${p.stock}）`"
+                :value="p.productId"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="秒杀价">
+            <el-input-number v-model="fsForm.flashPrice" :precision="2" :min="0.01" />
+            <span class="fs-tip" v-if="fsOriginalPrice > 0">原价 ¥{{ fsOriginalPrice }}，{{ fsDiscountText }}</span>
+          </el-form-item>
+          <el-form-item label="秒杀数量">
+            <el-input-number v-model="fsForm.totalQty" :min="1" :max="Math.max(1, fsMaxQty)" />
+            <span class="fs-tip">将从商品库存中预占，结束后未售出自动归还</span>
+          </el-form-item>
+          <el-form-item label="持续时长">
+            <el-radio-group v-model="fsForm.durationMinutes">
+              <el-radio-button :value="3">3 分钟</el-radio-button>
+              <el-radio-button :value="5">5 分钟</el-radio-button>
+              <el-radio-button :value="10">10 分钟</el-radio-button>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="danger" :loading="fsLoading" @click="handleStartFlashSale">
+              🚀 发起秒杀（观众端实时弹出）
+            </el-button>
+          </el-form-item>
+        </el-form>
+        <el-alert v-if="liveRoom.status !== 1 && !activeSale" type="info" :closable="false" show-icon>
+          开播后才能发起秒杀
+        </el-alert>
+      </el-card>
+
       <!-- AI助理开关 -->
       <el-card class="console-card">
         <template #header><span>AI助理</span></template>
@@ -160,9 +233,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { getLiveDetail, startLive, stopLive, addLiveProducts, setExplainingProduct, toggleAiAssistant, getHistoryMessages } from '@/api/live'
+import { getLiveDetail, startLive, stopLive, addLiveProducts, setExplainingProduct, toggleAiAssistant, getHistoryMessages, startFlashSale, cancelFlashSale, getActiveFlashSale } from '@/api/live'
 import { getProductList } from '@/api/product'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -184,6 +257,96 @@ const selectedProducts = ref([])
 const addLoading = ref(false)
 const historyMessages = ref([])
 const historyLoading = ref(false)
+
+// 🆕 闪购秒杀状态（Phase 2 - F3）
+const fsForm = ref({ productId: null, flashPrice: 0.01, totalQty: 10, durationMinutes: 3 })
+const activeSale = ref(null)
+const fsLoading = ref(false)
+const fsCancelLoading = ref(false)
+let fsPoller = null
+
+const fsSelectedProduct = computed(() =>
+  (liveRoom.value?.products || []).find(p => p.productId === fsForm.value.productId) || null
+)
+const fsOriginalPrice = computed(() => Number(fsSelectedProduct.value?.price || 0))
+const fsMaxQty = computed(() => fsSelectedProduct.value?.stock ?? 500)
+const fsDiscountText = computed(() => {
+  const op = fsOriginalPrice.value
+  const fp = Number(fsForm.value.flashPrice || 0)
+  if (op > 0 && fp > 0 && fp < op) return `相当于 ${(fp / op * 10).toFixed(1)} 折`
+  return ''
+})
+
+function onFsProductChange() {
+  const p = fsSelectedProduct.value
+  if (p) {
+    // 默认给个 8 折秒杀价，数量不超过库存的一半（至少1件）
+    fsForm.value.flashPrice = Math.max(0.01, Number((p.price * 0.8).toFixed(2)))
+    fsForm.value.totalQty = Math.max(1, Math.min(500, Math.floor((p.stock || 2) / 2)))
+  }
+}
+
+async function fetchActiveSale() {
+  try {
+    const res = await getActiveFlashSale(roomId)
+    activeSale.value = res.data || null
+    // 有进行中的活动时轮询进度（控制台无 WS，5 秒一次）
+    if (activeSale.value && !fsPoller) {
+      fsPoller = setInterval(fetchActiveSale, 5000)
+    } else if (!activeSale.value && fsPoller) {
+      clearInterval(fsPoller)
+      fsPoller = null
+    }
+  } catch (e) {
+    activeSale.value = null
+  }
+}
+
+async function handleStartFlashSale() {
+  if (!fsForm.value.productId) {
+    ElMessage.warning('请选择秒杀商品')
+    return
+  }
+  if (fsOriginalPrice.value > 0 && fsForm.value.flashPrice >= fsOriginalPrice.value) {
+    ElMessage.warning('秒杀价必须低于原价')
+    return
+  }
+  fsLoading.value = true
+  try {
+    const res = await startFlashSale({
+      roomId: Number(roomId),
+      productId: fsForm.value.productId,
+      flashPrice: fsForm.value.flashPrice,
+      totalQty: fsForm.value.totalQty,
+      durationMinutes: fsForm.value.durationMinutes
+    })
+    activeSale.value = res.data
+    ElMessage.success('🚀 秒杀已发起，观众端已实时弹出秒杀卡片！')
+    await fetchDetail() // 刷新商品库存展示（已预占）
+    fetchActiveSale()
+  } catch (e) {
+    // 拦截器已提示后端错误信息
+  } finally {
+    fsLoading.value = false
+  }
+}
+
+async function handleCancelFlashSale() {
+  try {
+    await ElMessageBox.confirm('确定终止本场秒杀吗？未售出库存将归还商城。', '提示', { type: 'warning' })
+  } catch { return }
+  fsCancelLoading.value = true
+  try {
+    await cancelFlashSale(activeSale.value.id)
+    ElMessage.success('秒杀已终止，库存已回补')
+    activeSale.value = null
+    await fetchDetail()
+  } catch (e) {
+    // 拦截器已提示
+  } finally {
+    fsCancelLoading.value = false
+  }
+}
 
 const statusText = computed(() => {
   if (!liveRoom.value) return ''
@@ -314,13 +477,22 @@ async function handleAddProducts() {
 onMounted(() => {
   fetchDetail()
   fetchHistory()
+  fetchActiveSale()
+})
+
+onUnmounted(() => {
+  if (fsPoller) {
+    clearInterval(fsPoller)
+    fsPoller = null
+  }
 })
 
 async function fetchHistory() {
   historyLoading.value = true
   try {
-    const res = await getHistoryMessages(roomId, { page: 1, size: 100 })
-    historyMessages.value = res.data || []
+    // 修复：分页参数为 page/size 两个数字，返回体为 {list,total,...}
+    const res = await getHistoryMessages(roomId, 1, 100)
+    historyMessages.value = res.data?.list || []
   } catch (e) {
     historyMessages.value = []
   } finally {
@@ -396,5 +568,43 @@ async function fetchHistory() {
   color: #999;
   font-size: 12px;
   flex-shrink: 0;
+}
+
+/* 🆕 闪购秒杀面板 */
+.flash-sale-card {
+  border: 1px solid #ffccc7;
+}
+.active-sale {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.active-sale-info {
+  flex: 1;
+}
+.active-sale-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 4px;
+}
+.active-sale-meta {
+  font-size: 13px;
+  color: #606266;
+}
+.fs-price {
+  color: #ff4d4f;
+  font-size: 17px;
+}
+.fs-original {
+  color: #c0c4cc;
+  text-decoration: line-through;
+  margin-left: 8px;
+  font-size: 12px;
+}
+.fs-tip {
+  margin-left: 12px;
+  font-size: 12px;
+  color: #909399;
 }
 </style>

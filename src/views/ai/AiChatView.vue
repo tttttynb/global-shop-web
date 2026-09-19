@@ -3,10 +3,14 @@
     <!-- 顶部标题栏 -->
     <div class="chat-header">
       <div class="header-info">
-        <span class="header-title">AI 智能客服</span>
+        <span class="header-title">AI 购物顾问</span>
+        <el-tag v-if="tierTag" :type="tierTagType" size="small" class="tier-badge">
+          {{ tierTag }}
+        </el-tag>
         <span class="online-dot"></span>
         <span class="online-text">在线</span>
       </div>
+      <div class="header-greeting" v-if="greeting">{{ greeting }}</div>
     </div>
 
     <!-- 消息区域 -->
@@ -22,8 +26,48 @@
           <el-icon :size="20"><Service /></el-icon>
         </el-avatar>
 
-        <div class="bubble" :class="msg.role">
-          {{ msg.content }}
+        <div class="bubble-col">
+          <div class="bubble" :class="msg.role">
+            {{ msg.content }}
+          </div>
+
+          <!-- 🆕 商品卡片（Phase 4 - F10：工具命中商品可一键加购） -->
+          <div v-if="msg.products && msg.products.length" class="product-cards">
+            <div
+              v-for="p in msg.products"
+              :key="p.id"
+              class="product-card"
+              @click="$router.push(`/product/${p.id}`)"
+            >
+              <el-image :src="p.coverImage" fit="cover" class="card-img">
+                <template #error>
+                  <div class="card-img-fallback"><el-icon><Picture /></el-icon></div>
+                </template>
+              </el-image>
+              <div class="card-info">
+                <div class="card-name">{{ p.name }}</div>
+                <div class="card-price">{{ localeStore.formatPrice(p.price) }}</div>
+              </div>
+              <el-button
+                size="small"
+                type="primary"
+                plain
+                :disabled="addedIds.has(p.id)"
+                @click.stop="addSingle(msg, p)"
+              >
+                {{ addedIds.has(p.id) ? '已加入' : '加购' }}
+              </el-button>
+            </div>
+            <el-button
+              class="batch-add-btn"
+              type="danger"
+              size="small"
+              :loading="batchAdding"
+              @click="addAll(msg)"
+            >
+              🛒 一键全部加购（{{ msg.products.length }} 件）
+            </el-button>
+          </div>
         </div>
 
         <!-- 用户头像 -->
@@ -85,23 +129,154 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
-import { Service, User, Promotion } from '@element-plus/icons-vue'
-import { chatWithAi } from '@/api/ai'
+import { ref, reactive, nextTick, onMounted, computed } from 'vue'
+import { Service, User, Promotion, Picture } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { chatWithAi, getUserProfile } from '@/api/ai'
+import { addToCart, batchAddToCart } from '@/api/cart'
+import { useCartStore } from '@/stores/cart'
+import { useLocaleStore } from '@/stores/locale'
+
+const localeStore = useLocaleStore()
+const cartStore = useCartStore()
 
 const messages = ref([
-  { role: 'assistant', content: '你好！我是GlobalShop AI客服，有什么可以帮您的？' }
+  { role: 'assistant', content: '你好！我是GlobalShop AI购物顾问，有什么可以帮您的？' }
 ])
 const inputMsg = ref('')
 const loading = ref(false)
 const messagesRef = ref(null)
+const greeting = ref('')
+const tierTag = ref('')
+const tierTagType = ref('info')
+const userTier = ref('')
 
-const quickQuestions = [
+// 🆕 商品卡片加购状态（Phase 4 - F10）
+const addedIds = reactive(new Set())
+const batchAdding = ref(false)
+
+/** 单个商品加购 */
+async function addSingle(msg, p) {
+  try {
+    const res = await addToCart({ productId: p.id, quantity: 1 })
+    if (res.code === 200) {
+      addedIds.add(p.id)
+      cartStore.increment()
+      ElMessage.success('已加入购物车')
+    } else {
+      ElMessage.error(res.message || '加购失败')
+    }
+  } catch (e) {
+    ElMessage.error(e.message || '加购失败')
+  }
+}
+
+/** 一键全部加购 */
+async function addAll(msg) {
+  batchAdding.value = true
+  try {
+    const items = msg.products.map(p => ({ productId: p.id, quantity: 1 }))
+    const res = await batchAddToCart(items)
+    if (res.code === 200) {
+      msg.products.forEach(p => {
+        addedIds.add(p.id)
+        cartStore.increment()
+      })
+      ElMessage.success(res.data || '已加入购物车')
+    } else {
+      ElMessage.error(res.message || '加购失败')
+    }
+  } catch (e) {
+    ElMessage.error(e.message || '加购失败')
+  } finally {
+    batchAdding.value = false
+  }
+}
+
+/** 层级标签映射 */
+const tierLabelMap = { PREMIUM: '🏆 高端优选', MID: '🥈 品质甄选', BUDGET: '🥉 实惠推荐', NEW: '👤 新客探索' }
+const tierTagTypeMap = { PREMIUM: 'danger', MID: 'warning', BUDGET: 'success', NEW: 'info' }
+
+/** 默认快捷问题（🆕 Phase 4 - F10 金牌导购风格） */
+const defaultQuickQuestions = [
+  '预算500元，送女朋友什么礼物好？',
+  '帮我配一套露营装备',
   '我的订单状态怎么样？',
-  '推荐一些热门商品',
-  '如何申请退款？',
-  '运费怎么计算？'
+  '有什么口碑好的热门商品？'
 ]
+
+/** 层级特定的快捷问题 */
+const tierQuickQuestions = {
+  PREMIUM: [
+    '预算5000元，推荐一块高端腕表',
+    '有什么限量款值得入手？',
+    '帮我搭配一套商务出差装备',
+    '我的订单物流到哪了？'
+  ],
+  MID: [
+    '预算2000元，推荐高性价比数码产品',
+    '帮我配一套健身装备',
+    '最近有什么促销活动？',
+    '有什么口碑好的商品？'
+  ],
+  BUDGET: [
+    '预算300元以内有什么超值好物？',
+    '怎么签到领积分抵现？',
+    '有什么秒杀活动？',
+    '怎么使用优惠券？'
+  ],
+  NEW: [
+    '推荐一些热门商品',
+    '预算1000元的新用户好物清单',
+    '平台有什么特色功能？',
+    '运费怎么计算？'
+  ]
+}
+
+const quickQuestions = ref(defaultQuickQuestions)
+
+/** 加载用户画像，设置个性化欢迎语和快捷问题 */
+async function loadUserProfile() {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    const res = await getUserProfile()
+    if (res.code === 200 && res.data) {
+      const profile = res.data
+      const tier = profile.userTier || 'NEW'
+      userTier.value = tier
+      tierTag.value = tierLabelMap[tier] || ''
+      tierTagType.value = tierTagTypeMap[tier] || 'info'
+
+      // 构建个性化问候语
+      const greetings = {
+        PREMIUM: '尊敬的 VIP 客户您好！我是您的私人购物顾问「小波」，很高兴为您服务 🎩',
+        MID: '您好！我是您的专属购物助手「小波」，为您甄选品质好物 ✨',
+        BUDGET: '嗨！我是您的贴心购物助手「小波」，帮您淘到实惠好货 🛍️',
+        NEW: '欢迎来到 GlobalShop！我是您的购物向导「小波」，让我带您探索全球好物 🌍'
+      }
+      greeting.value = greetings[tier] || greetings.NEW
+
+      // 更新欢迎消息
+      const welcomeGreetings = {
+        PREMIUM: '尊敬的 VIP 客户您好！我是您的私人购物顾问「小波」。有什么高端好物需要我为您寻觅？🎩',
+        MID: '您好！我是您的专属购物助手「小波」，为您甄选品质好物。有什么可以帮您的？✨',
+        BUDGET: '嗨！我是「小波」，您的贴心购物助手。帮您淘实惠、找好货，有什么想看看的？🛍️',
+        NEW: '欢迎来到 GlobalShop！我是「小波」，您的购物向导。有什么想了解的，尽管问我！🌍'
+      }
+      messages.value[0] = {
+        role: 'assistant',
+        content: welcomeGreetings[tier] || welcomeGreetings.NEW
+      }
+
+      // 更新快捷问题
+      quickQuestions.value = tierQuickQuestions[tier] || defaultQuickQuestions
+    }
+  } catch {
+    // 静默失败 — 未登录或接口异常时使用默认配置
+  }
+}
 
 function scrollToBottom() {
   nextTick(() => {
@@ -121,7 +296,11 @@ async function sendMessage() {
   loading.value = true
   try {
     const res = await chatWithAi(userMsg)
-    messages.value.push({ role: 'assistant', content: res.data })
+    // 🆕 Phase 4 - F10：后端返回 {reply, products}（products=工具命中的可加购商品卡片）
+    const data = res.data || {}
+    const reply = typeof data === 'string' ? data : (data.reply || '')
+    const products = Array.isArray(data.products) ? data.products : []
+    messages.value.push({ role: 'assistant', content: reply, products })
   } catch (e) {
     messages.value.push({ role: 'assistant', content: '抱歉，我暂时无法回答，请稍后再试。' })
   } finally {
@@ -135,8 +314,9 @@ function sendQuick(question) {
   sendMessage()
 }
 
-onMounted(() => {
+onMounted(async () => {
   scrollToBottom()
+  await loadUserProfile()
 })
 </script>
 
@@ -169,6 +349,17 @@ onMounted(() => {
   font-size: 18px;
   font-weight: 600;
   color: #303133;
+}
+
+.tier-badge {
+  font-size: 12px;
+}
+
+.header-greeting {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #909399;
+  font-style: italic;
 }
 
 .online-dot {
@@ -227,6 +418,84 @@ onMounted(() => {
   font-size: 14px;
   line-height: 1.6;
   word-break: break-word;
+}
+
+/* 🆕 气泡 + 商品卡片纵向布局（Phase 4 - F10） */
+.bubble-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 85%;
+  min-width: 0;
+}
+
+.bubble-col .bubble {
+  max-width: 100%;
+  align-self: flex-start;
+}
+
+.product-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #ebeef5;
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.product-card:hover {
+  border-color: #409eff;
+  box-shadow: 0 2px 10px rgba(64, 158, 255, 0.15);
+}
+
+.card-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.card-img-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: #f5f7fa;
+  color: #c0c4cc;
+}
+
+.card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-name {
+  font-size: 13px;
+  color: #303133;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e6323e;
+  margin-top: 4px;
+}
+
+.batch-add-btn {
+  align-self: flex-start;
 }
 
 .bubble.assistant {

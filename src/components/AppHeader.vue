@@ -7,18 +7,19 @@
       </router-link>
 
       <nav class="nav-links">
-        <router-link to="/">首页</router-link>
-        <router-link to="/products">全部商品</router-link>
-        <router-link to="/live">直播</router-link>
-        <router-link to="/ai/search">AI搜索</router-link>
-        <router-link to="/ai/chat">AI客服</router-link>
+        <router-link to="/">{{ $t('header.home') }}</router-link>
+        <router-link to="/products">{{ $t('header.allProducts') }}</router-link>
+        <router-link to="/live">{{ $t('header.live') }}</router-link>
+        <router-link to="/group-buy" class="nav-groupbuy">{{ $t('header.groupBuy') }}</router-link>
+        <router-link to="/ai/search">{{ $t('header.aiSearch') }}</router-link>
+        <router-link to="/ai/chat">{{ $t('header.aiChat') }}</router-link>
       </nav>
 
       <div class="header-right">
         <div class="search-box">
           <el-input
             v-model="searchKeyword"
-            placeholder="搜索商品..."
+            :placeholder="$t('header.searchPlaceholder')"
             @keyup.enter="handleSearch"
             size="default"
             clearable
@@ -29,7 +30,92 @@
               </el-button>
             </template>
           </el-input>
+          <!-- 🆕 以图搜图入口（Phase 2 - F4） -->
+          <el-tooltip :content="$t('header.imageSearchTip')" placement="bottom">
+            <router-link to="/ai/search?mode=image" class="camera-entry">
+              <el-icon :size="20"><Camera /></el-icon>
+            </router-link>
+          </el-tooltip>
         </div>
+
+        <!-- 🆕 语言切换（Phase 3 - F5） -->
+        <el-dropdown trigger="click" @command="handleLangChange">
+          <span class="switcher" :title="$t('header.language')">
+            🌐 {{ localeStore.localeOption.label }}
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                v-for="l in supportedLocales"
+                :key="l.code"
+                :command="l.code"
+                :class="{ active: localeStore.locale === l.code }"
+              >
+                {{ l.flag }} {{ l.label }}
+                <el-icon v-if="localeStore.locale === l.code" style="margin-left:6px"><Check /></el-icon>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+
+        <!-- 🆕 币种切换（Phase 3 - F5，汇率来自 exchange_rate 表，Redis 缓存 1h） -->
+        <el-dropdown trigger="click" @command="handleCurrencyChange">
+          <span class="switcher" :title="$t('header.currency')">
+            💱 {{ localeStore.currencyOption.code }}
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                v-for="c in currencyOptions"
+                :key="c.code"
+                :command="c.code"
+              >
+                {{ c.symbol }} {{ c.label }}
+                <el-icon v-if="localeStore.currency === c.code" style="margin-left:6px"><Check /></el-icon>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+
+        <!-- 通知铃铛 -->
+        <el-popover
+          v-if="userStore.isLoggedIn"
+          placement="bottom"
+          :width="300"
+          trigger="click"
+          @show="fetchNotifications"
+        >
+          <template #reference>
+            <span class="notif-icon">
+              <el-badge :value="notifCount" :hidden="notifCount === 0">
+                <el-icon :size="22"><Bell /></el-icon>
+              </el-badge>
+            </span>
+          </template>
+          <div class="notif-popover">
+            <div class="notif-header">
+              <span>📬 {{ $t('header.notifications') }}（{{ $t('header.unread', { count: notifCount }) }}）</span>
+              <el-button text size="small" @click="clearNotifications" v-if="notifications.length > 0">{{ $t('header.clear') }}</el-button>
+            </div>
+            <div v-if="notifications.length === 0" class="notif-empty">{{ $t('header.noNotifications') }}</div>
+            <template v-for="n in notifications.slice(0, 8)" :key="n.id">
+              <div
+                class="notif-item"
+                :class="{ unread: n.isRead === 0 }"
+                @click="handleNotifClick(n)"
+              >
+                <span class="notif-type">{{ typeEmoji(n.type) }}</span>
+                <div class="notif-text">
+                  <span class="notif-msg">{{ n.title }}</span>
+                  <span class="notif-sub">{{ n.content?.substring(0, 40) }}{{ n.content?.length > 40 ? '...' : '' }}</span>
+                </div>
+              </div>
+            </template>
+            <div class="notif-footer" v-if="notifications.length > 0">
+              <el-button text size="small" @click="goToNotifications">{{ $t('header.viewAll') }}</el-button>
+            </div>
+          </div>
+        </el-popover>
 
         <router-link to="/cart" class="cart-icon" v-if="userStore.isLoggedIn">
           <el-badge :value="cartStore.itemCount" :hidden="cartStore.itemCount === 0">
@@ -45,21 +131,22 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item @click="$router.push('/profile')">个人中心</el-dropdown-item>
-                <el-dropdown-item @click="$router.push('/orders')">我的订单</el-dropdown-item>
-                <el-dropdown-item @click="$router.push('/favorites')">我的收藏</el-dropdown-item>
-                <el-dropdown-item @click="$router.push('/coupons')">我的优惠券</el-dropdown-item>
-                <el-dropdown-item @click="$router.push('/refunds')">退款记录</el-dropdown-item>
-                <el-dropdown-item divided @click="$router.push('/merchant/apply')">我要开店</el-dropdown-item>
-                <el-dropdown-item @click="$router.push('/merchant/dashboard')">商户中心</el-dropdown-item>
-                <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/profile')">{{ $t('header.profile') }}</el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/orders')">{{ $t('header.myOrders') }}</el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/favorites')">{{ $t('header.favorites') }}</el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/coupons')">{{ $t('header.myCoupons') }}</el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/points')">{{ $t('header.pointsCenter') }}</el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/refunds')">{{ $t('header.refundRecords') }}</el-dropdown-item>
+                <el-dropdown-item divided @click="$router.push('/merchant/apply')">{{ $t('header.openShop') }}</el-dropdown-item>
+                <el-dropdown-item @click="$router.push('/merchant/dashboard')">{{ $t('header.merchantCenter') }}</el-dropdown-item>
+                <el-dropdown-item divided @click="handleLogout">{{ $t('header.logout') }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </template>
         <template v-else>
           <router-link to="/login">
-            <el-button type="primary" size="small">登录</el-button>
+            <el-button type="primary" size="small">{{ $t('header.login') }}</el-button>
           </router-link>
         </template>
       </div>
@@ -68,15 +155,172 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
+import { useLocaleStore, CURRENCY_OPTIONS } from '@/stores/locale'
+import { SUPPORTED_LOCALES } from '@/i18n'
+import { getNotifications, getUnreadCount, markAsRead } from '@/api/notification'
 
 const router = useRouter()
+const { t } = useI18n()
 const userStore = useUserStore()
 const cartStore = useCartStore()
+const localeStore = useLocaleStore()
+const supportedLocales = SUPPORTED_LOCALES
+const currencyOptions = CURRENCY_OPTIONS
 const searchKeyword = ref('')
+const notifications = ref([])
+const notifCount = ref(0)
+let notifTimer = null
+let ws = null
+
+// 🆕 语言切换（Phase 3 - F5）：界面语言即时生效，商品文案由各页面按 locale 重新拉取
+function handleLangChange(code) {
+  if (code === localeStore.locale) return
+  localeStore.setLocale(code)
+  ElMessage.success(t('messages.langSwitched'))
+}
+
+// 🆕 币种切换（Phase 3 - F5）：全站金额按实时汇率换算为参考价展示
+async function handleCurrencyChange(code) {
+  if (code === localeStore.currency) return
+  localeStore.setCurrency(code)
+  if (code !== 'CNY' && !localeStore.ratesLoaded) {
+    await localeStore.loadRates()
+    if (!localeStore.ratesLoaded) {
+      ElMessage.warning(t('messages.ratesLoadFailed'))
+      return
+    }
+  }
+  ElMessage.success(t('messages.currencySwitched', { currency: code }))
+}
+
+onMounted(() => {
+  if (userStore.isLoggedIn) {
+    fetchNotifications()
+    fetchUnreadCount()
+    notifTimer = setInterval(fetchUnreadCount, 60000)
+    connectNotificationWs()
+  }
+})
+
+// 登录状态变化时连接/断开 WebSocket
+watch(() => userStore.isLoggedIn, (val) => {
+  if (val) {
+    fetchNotifications()
+    fetchUnreadCount()
+    connectNotificationWs()
+  } else {
+    disconnectWs()
+  }
+})
+
+onUnmounted(() => {
+  if (notifTimer) clearInterval(notifTimer)
+  disconnectWs()
+})
+
+function connectNotificationWs() {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) return
+    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
+    const host = location.host
+    ws = new WebSocket(`${protocol}//${host}/ws/notification?token=${token}`)
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        // 实时推送的新通知 — 插到列表最前面
+        notifications.value.unshift(data)
+        notifications.value = notifications.value.slice(0, 30)
+        notifCount.value++
+      } catch { /* ignore */ }
+    }
+    ws.onclose = () => {
+      // 断线重连（5秒后）
+      setTimeout(() => {
+        if (userStore.isLoggedIn) connectNotificationWs()
+      }, 5000)
+    }
+  } catch { /* ignore */ }
+}
+
+function disconnectWs() {
+  if (ws) {
+    ws.onclose = null // 防止重连
+    ws.close()
+    ws = null
+  }
+}
+
+async function fetchNotifications() {
+  try {
+    const res = await getNotifications(1, 10)
+    if (res.code === 200 && res.data) {
+      notifications.value = res.data
+    }
+  } catch {
+    // 静默失败
+  }
+}
+
+async function fetchUnreadCount() {
+  try {
+    const res = await getUnreadCount()
+    if (res.code === 200 && res.data) {
+      notifCount.value = res.data.unreadCount || 0
+    }
+  } catch {
+    // 静默失败
+  }
+}
+
+async function handleNotifClick(item) {
+  // 标记已读
+  if (item.isRead === 0) {
+    try {
+      await markAsRead(item.id)
+      item.isRead = 1
+      notifCount.value = Math.max(0, notifCount.value - 1)
+    } catch { /* ignore */ }
+  }
+
+  // 跳转
+  const { targetType, targetId } = item
+  if (!targetType || targetType === 'NONE' || !targetId) return
+  switch (targetType) {
+    case 'ORDER':
+      router.push(`/order/${targetId}`)
+      break
+    case 'PRODUCT':
+      router.push(`/product/${targetId}`)
+      break
+    case 'LIVE':
+      router.push(`/live/${targetId}`)
+      break
+    case 'COUPON':
+      router.push('/coupons')
+      break
+  }
+}
+
+function typeEmoji(type) {
+  const map = { ORDER_STATUS: '📦', COUPON_EXPIRE: '🎫', LIVE_START: '📺', PROMOTION: '🎉', SYSTEM: '🔔' }
+  return map[type] || '🔔'
+}
+
+function clearNotifications() {
+  notifications.value = []
+  notifCount.value = 0
+}
+
+function goToNotifications() {
+  router.push('/notifications')
+}
 
 function handleSearch() {
   if (searchKeyword.value.trim()) {
@@ -126,6 +370,11 @@ function handleLogout() {
   transition: color 0.2s;
   white-space: nowrap;
 }
+/* 👥 拼团专区入口高亮（Phase 4 - F7） */
+.nav-links a.nav-groupbuy {
+  color: #ee0a24;
+  font-weight: 600;
+}
 .nav-links a:hover,
 .nav-links a.router-link-active {
   color: #409eff;
@@ -137,7 +386,31 @@ function handleLogout() {
   gap: 16px;
 }
 .search-box {
-  width: 240px;
+  width: 280px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.search-box .el-input {
+  flex: 1;
+  min-width: 0;
+}
+/* 🆕 以图搜图相机入口 */
+.camera-entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 32px;
+  border-radius: 6px;
+  color: #666;
+  background: #f5f7fa;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.camera-entry:hover {
+  color: #fff;
+  background: linear-gradient(135deg, #409eff, #67c23a);
 }
 .cart-icon {
   cursor: pointer;
@@ -148,6 +421,20 @@ function handleLogout() {
 .cart-icon:hover {
   color: #409eff;
 }
+/* 🆕 语言/币种切换器（Phase 3 - F5） */
+.switcher {
+  cursor: pointer;
+  color: #666;
+  font-size: 13px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  outline: none;
+}
+.switcher:hover {
+  color: #409eff;
+}
 .user-info {
   display: flex;
   align-items: center;
@@ -155,5 +442,71 @@ function handleLogout() {
   cursor: pointer;
   color: #666;
   font-size: 14px;
+}
+.notif-icon {
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+}
+.notif-icon:hover {
+  color: #409eff;
+}
+.notif-popover .notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ebeef5;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.notif-empty {
+  text-align: center;
+  color: #909399;
+  padding: 20px 0;
+  font-size: 13px;
+}
+.notif-item {
+  padding: 10px 8px;
+  border-bottom: 1px solid #f5f5f5;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.notif-item.unread {
+  background: #ecf5ff;
+}
+.notif-item:hover {
+  background: #e8f0fe;
+}
+.notif-type {
+  font-size: 16px;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+.notif-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.notif-msg {
+  color: #303133;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.notif-sub {
+  color: #909399;
+  font-size: 12px;
+  line-height: 1.3;
+}
+.notif-footer {
+  text-align: center;
+  padding: 8px 0 0;
+  border-top: 1px solid #ebeef5;
+  margin-top: 4px;
 }
 </style>

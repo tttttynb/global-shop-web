@@ -26,9 +26,10 @@
             </el-image>
             <div class="item-info">
               <span class="item-name">{{ item.productName }}</span>
+              <span v-if="item.skuSpec && item.skuSpec !== '默认规格'" class="item-spec" style="font-size:12px;color:#909399;background:#f5f7fa;border-radius:4px;padding:2px 8px;align-self:flex-start;">{{ item.skuSpec }}</span>
               <span class="item-qty">x{{ item.quantity }}</span>
             </div>
-            <span class="item-price">¥{{ item.price?.toFixed(2) }}</span>
+            <span class="item-price">{{ localeStore.formatPrice(item.price) }}</span>
           </div>
 
           <el-divider />
@@ -36,11 +37,36 @@
           <div class="order-summary">
             <div v-if="order.discountAmount > 0" class="summary-row">
               <span>优惠金额</span>
-              <span class="discount">-¥{{ order.discountAmount?.toFixed(2) }}</span>
+              <span class="discount">-{{ localeStore.formatPrice(order.discountAmount) }}</span>
+            </div>
+            <!-- 🆕 国际运费 + 跨境税（Phase 3 - F6） -->
+            <div v-if="Number(order.shippingFee) > 0" class="summary-row">
+              <span>{{ $t('order.shippingFee') }}</span>
+              <span>{{ localeStore.formatPrice(order.shippingFee) }}</span>
+            </div>
+            <div v-if="Number(order.taxFee) > 0" class="summary-row">
+              <span>{{ $t('order.taxFee') }}</span>
+              <span>{{ localeStore.formatPrice(order.taxFee) }}</span>
             </div>
             <div class="summary-row">
               <span>实付金额</span>
-              <span class="total-amount">¥{{ order.totalAmount?.toFixed(2) }}</span>
+              <span class="total-amount">{{ localeStore.formatPrice(order.totalAmount) }}</span>
+            </div>
+            <!-- 🆕 下单时锁汇快照（Phase 3 - F5：结算金额与展示一致，可追溯） -->
+            <div v-if="order.currency && order.currency !== 'CNY'" class="summary-row forex-row">
+              <span>{{ $t('order.forexSnapshot') }}</span>
+              <span>
+                {{ order.currency }} {{ Number(order.originalAmount || 0).toFixed(2) }}
+                · {{ $t('order.lockedRate') }} 1 {{ order.currency }} = {{ order.exchangeRate }} CNY
+              </span>
+            </div>
+            <div v-if="order.paymentType" class="summary-row">
+              <span>支付方式</span>
+              <span>{{ order.paymentType }}</span>
+            </div>
+            <div v-if="order.payTime" class="summary-row">
+              <span>支付时间</span>
+              <span>{{ order.payTime }}</span>
             </div>
             <div class="summary-row">
               <span>下单时间</span>
@@ -48,8 +74,32 @@
             </div>
           </div>
 
+          <!-- 物流追踪卡片（订单已发货时显示） -->
+          <template v-if="order.status === 3 && order.carrierName">
+            <el-divider />
+            <div class="shipping-card">
+              <h3>物流信息</h3>
+              <div class="shipping-info">
+                <span class="shipping-carrier">{{ order.carrierName }}</span>
+                <span class="shipping-tracking">运单号：{{ order.trackingNumber }}</span>
+                <span v-if="order.shippedAt" class="shipping-time">发货时间：{{ order.shippedAt }}</span>
+              </div>
+              <div class="shipping-actions">
+                <el-button type="primary" @click="$router.push(`/order/${order.id}/tracking`)">
+                  查看物流详情
+                </el-button>
+                <el-button type="success" @click="handleConfirm(order.id)" :loading="confirming">
+                  确认收货
+                </el-button>
+              </div>
+            </div>
+          </template>
+
           <div class="order-actions" v-if="order.status === 0">
             <el-button type="danger" @click="$router.push(`/order/pay/${order.id}`)">去支付</el-button>
+          </div>
+          <div class="order-actions" v-if="order.status === 3 && !order.carrierName">
+            <el-button type="success" @click="handleConfirm(order.id)" :loading="confirming">确认收货</el-button>
           </div>
           <div class="order-actions" v-if="order.status === 1 || order.status === 4">
             <el-button type="warning" @click="$router.push(`/refund/apply?orderId=${order.id}`)">申请退款</el-button>
@@ -64,10 +114,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getOrderDetail } from '@/api/order'
+import { ElMessage } from 'element-plus'
+import { getOrderDetail, confirmReceipt } from '@/api/order'
+import { useLocaleStore } from '@/stores/locale'
 
 const route = useRoute()
+const localeStore = useLocaleStore()
 const loading = ref(true)
+const confirming = ref(false)
 const order = ref(null)
 
 function statusText(s) {
@@ -75,6 +129,21 @@ function statusText(s) {
 }
 function statusTagType(s) {
   return { 0: 'warning', 1: '', 2: 'info', 3: 'primary', 4: 'success', 5: 'success' }[s] || 'info'
+}
+
+async function handleConfirm(orderId) {
+  confirming.value = true
+  try {
+    await confirmReceipt(orderId)
+    ElMessage.success('确认收货成功！')
+    // 刷新订单
+    const res = await getOrderDetail(route.params.id)
+    order.value = res.data
+  } catch (e) {
+    ElMessage.error('确认收货失败')
+  } finally {
+    confirming.value = false
+  }
 }
 
 onMounted(async () => {
@@ -105,5 +174,45 @@ onMounted(async () => {
 .summary-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; color: #606266; }
 .total-amount { font-size: 20px; font-weight: 700; color: #e6323e; }
 .discount { color: #67c23a; }
+/* 🆕 锁汇快照行（Phase 3 - F5） */
+.forex-row span:last-child { font-size: 12px; color: #409eff; text-align: right; }
 .order-actions { margin-top: 16px; text-align: right; }
+
+/* Shipping card */
+.shipping-card {
+  background: #f0f9ff;
+  border: 1px solid #b3d8ff;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 8px;
+}
+.shipping-card h3 {
+  font-size: 16px;
+  margin: 0 0 12px 0;
+  color: #303133;
+}
+.shipping-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+.shipping-carrier {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+}
+.shipping-tracking {
+  font-size: 14px;
+  color: #606266;
+  font-family: 'Courier New', monospace;
+}
+.shipping-time {
+  font-size: 13px;
+  color: #909399;
+}
+.shipping-actions {
+  display: flex;
+  gap: 12px;
+}
 </style>

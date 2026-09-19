@@ -1,6 +1,6 @@
 <template>
   <div class="page-container cart-page">
-    <h2 class="page-title">我的购物车</h2>
+    <h2 class="page-title">{{ $t('cart.title') }}</h2>
 
     <div v-if="loading" class="loading-wrap">
       <el-skeleton :rows="5" animated />
@@ -24,50 +24,72 @@
           </el-image>
           <div class="item-info">
             <router-link :to="`/product/${item.productId}`" class="item-name">{{ item.productName }}</router-link>
-            <div class="item-price">¥{{ item.price.toFixed(2) }}</div>
+            <div v-if="item.skuSpec && item.skuSpec !== '默认规格'" class="item-spec">{{ $t('cart.spec') }}{{ item.skuSpec }}</div>
+            <div class="item-price">{{ localeStore.formatPrice(item.price) }}</div>
           </div>
           <div class="item-quantity">
             <el-input-number v-model="item.quantity" :min="1" :max="99" size="small" @change="(val) => handleUpdateQty(item.cartItemId, val)" />
           </div>
-          <div class="item-subtotal">¥{{ item.itemTotalAmount.toFixed(2) }}</div>
+          <div class="item-subtotal">{{ localeStore.formatPrice(item.itemTotalAmount) }}</div>
           <el-button type="danger" text :icon="Delete" @click="handleRemove(item.cartItemId)" :loading="removingId === item.cartItemId">
-            删除
+            {{ $t('cart.delete') }}
           </el-button>
         </div>
       </el-card>
 
       <div class="checkout-bar">
+        <!-- 🆕 运费/税费提示（Phase 3 - F6：结算时自动计入） -->
+        <div class="bar-tax-hint">{{ $t('cart.taxHint') }}</div>
+        <!-- 🆕 积分抵扣（Phase 4 - F8） -->
+        <div class="points-deduct" v-if="pointsSummary.points > 0">
+          <el-checkbox v-model="usePoints" @change="handleUsePointsChange">
+            {{ $t('cart.usePoints', { points: pointsSummary.points }) }}
+          </el-checkbox>
+          <span v-if="usePoints && deduction" class="deduct-hint">
+            {{ $t('cart.pointsDeductEst', { points: deduction.pointsUsed, amount: localeStore.formatPrice(deduction.deductAmount) }) }}
+          </span>
+        </div>
         <div class="total-info">
-          合计：<span class="total-price">¥{{ totalAmount.toFixed(2) }}</span>
+          {{ $t('cart.totalLabel') }}<span class="total-price">{{ localeStore.formatPrice(totalAmount) }}</span>
         </div>
         <el-button type="danger" size="large" @click="handleCheckout" :loading="checkingOut">
-          去结算
+          {{ $t('cart.checkout') }}
         </el-button>
       </div>
     </template>
 
-    <el-empty v-else description="购物车是空的">
-      <el-button type="primary" @click="$router.push('/products')">去逛逛</el-button>
+    <el-empty v-else :description="$t('cart.empty')">
+      <el-button type="primary" @click="$router.push('/products')">{{ $t('cart.goShopping') }}</el-button>
     </el-empty>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Delete, Shop, Picture } from '@element-plus/icons-vue'
 import { getCartList, removeCartItem, updateCartItem } from '@/api/cart'
 import { checkoutCart } from '@/api/order'
+import { getPointsSummary, previewDeduction } from '@/api/points'
 import { useCartStore } from '@/stores/cart'
+import { useLocaleStore } from '@/stores/locale'
 
 const router = useRouter()
+const { t } = useI18n()
 const cartStore = useCartStore()
+const localeStore = useLocaleStore()
 
 const loading = ref(false)
 const cartList = ref([])
 const removingId = ref(null)
 const checkingOut = ref(false)
+
+// 🆕 积分抵扣（Phase 4 - F8）
+const usePoints = ref(false)
+const pointsSummary = ref({ points: 0 })
+const deduction = ref(null)
 
 const totalAmount = computed(() => {
   let sum = 0
@@ -96,7 +118,7 @@ async function fetchCart() {
     cartList.value = res.data || []
     cartStore.setCount(totalItemCount.value)
   } catch (e) {
-    ElMessage.error('获取购物车失败')
+    ElMessage.error(t('messages.fetchCartFailed'))
   } finally {
     loading.value = false
   }
@@ -106,10 +128,10 @@ async function handleRemove(cartItemId) {
   removingId.value = cartItemId
   try {
     await removeCartItem(cartItemId)
-    ElMessage.success('已移除')
+    ElMessage.success(t('messages.removed'))
     await fetchCart()
   } catch (e) {
-    ElMessage.error('删除失败')
+    ElMessage.error(t('messages.removeFailed'))
   } finally {
     removingId.value = null
   }
@@ -120,27 +142,62 @@ async function handleUpdateQty(cartItemId, quantity) {
     await updateCartItem(cartItemId, quantity)
     await fetchCart()
   } catch (e) {
-    ElMessage.error('更新数量失败')
+    ElMessage.error(t('messages.qtyUpdateFailed'))
   }
 }
 
 async function handleCheckout() {
   checkingOut.value = true
   try {
-    const res = await checkoutCart()
+    const res = await checkoutCart(usePoints.value)
     const orderId = res.data
-    ElMessage.success('下单成功')
+    ElMessage.success(t('messages.orderSuccess'))
     cartStore.setCount(0)
     router.push(`/order/pay/${orderId}`)
   } catch (e) {
-    ElMessage.error(e.message || '结算失败')
+    ElMessage.error(e.message || t('messages.checkoutFailed'))
   } finally {
     checkingOut.value = false
   }
 }
 
+// ==================== 积分抵扣（Phase 4 - F8） ====================
+
+async function loadPointsSummary() {
+  try {
+    const res = await getPointsSummary()
+    if (res.code === 200 && res.data) {
+      pointsSummary.value = res.data
+    }
+  } catch {
+    // 静默失败 — 无积分账户时不展示抵扣入口
+  }
+}
+
+async function handleUsePointsChange(val) {
+  if (!val) {
+    deduction.value = null
+    return
+  }
+  await refreshDeductionPreview()
+}
+
+async function refreshDeductionPreview() {
+  if (!usePoints.value || totalAmount.value <= 0) return
+  try {
+    const res = await previewDeduction(totalAmount.value)
+    deduction.value = res.code === 200 ? res.data : null
+  } catch {
+    deduction.value = null
+  }
+}
+
+// 购物车金额变化时同步刷新抵扣试算
+watch(totalAmount, () => refreshDeductionPreview())
+
 onMounted(() => {
   fetchCart()
+  loadPointsSummary()
 })
 </script>
 
@@ -224,6 +281,16 @@ onMounted(() => {
   color: #409eff;
 }
 
+.item-spec {
+  display: inline-block;
+  font-size: 12px;
+  color: #909399;
+  background: #f5f7fa;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-bottom: 6px;
+}
+
 .item-price {
   font-size: 13px;
   color: #909399;
@@ -262,6 +329,26 @@ onMounted(() => {
 .total-info {
   font-size: 15px;
   color: #606266;
+}
+
+/* 🆕 结算栏运费/税费提示（Phase 3 - F6） */
+.bar-tax-hint {
+  margin-right: auto;
+  font-size: 12px;
+  color: #909399;
+}
+
+/* 🆕 积分抵扣（Phase 4 - F8） */
+.points-deduct {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.deduct-hint {
+  color: #e6323e;
+  font-weight: 600;
 }
 
 .total-price {

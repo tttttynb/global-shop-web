@@ -13,7 +13,8 @@
       <h3 class="product-name">{{ product.name }}</h3>
       <p class="product-desc" v-if="product.description">{{ product.description }}</p>
       <div class="product-bottom">
-        <span class="product-price">¥{{ product.price }}</span>
+        <!-- 金额随展示币种换算（Phase 3 - F5 参考价） -->
+        <span class="product-price">{{ localeStore.formatPrice(product.price) }}</span>
         <span class="product-shop" v-if="product.shopName">{{ product.shopName }}</span>
       </div>
     </div>
@@ -22,12 +23,14 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { useLocaleStore } from '@/stores/locale'
 
 const props = defineProps({
   product: { type: Object, required: true }
 })
 
 const router = useRouter()
+const localeStore = useLocaleStore()
 
 function goDetail() {
   router.push(`/product/${props.product.id}`)

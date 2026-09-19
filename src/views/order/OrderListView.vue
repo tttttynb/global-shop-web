@@ -26,7 +26,7 @@
 
         <div class="order-items">
           <div v-for="item in order.items" :key="item.id" class="order-item">
-            <span class="oi-name">{{ item.productName }}</span>
+            <span class="oi-name">{{ item.productName }}<em v-if="item.skuSpec && item.skuSpec !== '默认规格'" style="font-style:normal;font-size:12px;color:#909399;background:#f5f7fa;border-radius:4px;padding:1px 6px;margin-left:6px;">{{ item.skuSpec }}</em></span>
             <span class="oi-quantity">x{{ item.quantity }}</span>
             <span class="oi-price">¥{{ item.price.toFixed(2) }}</span>
           </div>

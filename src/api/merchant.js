@@ -12,8 +12,8 @@ export function getMerchantOrders() {
   return request.get('/merchant/order/list')
 }
 
-export function deliverOrder(id) {
-  return request.post(`/merchant/order/deliver/${id}`)
+export function deliverOrder(data) {
+  return request.post('/merchant/order/deliver', data)
 }
 
 export function aiAnalyzeProduct(imageUrl, keyword) {

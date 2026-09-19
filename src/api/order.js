@@ -8,8 +8,9 @@ export function getMyOrders() {
   return request.get('/order/my')
 }
 
-export function checkoutCart() {
-  return request.post('/order/checkout')
+/** 购物车结算；usePoints=true 时启用积分抵扣（Phase 4 - F8） */
+export function checkoutCart(usePoints = false) {
+  return request.post('/order/checkout', null, { params: usePoints ? { usePoints: true } : {} })
 }
 
 export function payOrder(id) {

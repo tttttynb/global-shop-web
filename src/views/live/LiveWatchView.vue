@@ -24,6 +24,10 @@
               <p>{{ liveRoom.status === 0 ? '直播尚未开始' : '直播已结束' }}</p>
             </div>
           </template>
+          <!-- 🆕 闪购秒杀卡片：视频区左下角悬浮（Phase 2 - F3） -->
+          <div class="flash-sale-overlay" v-if="flashSale">
+            <FlashSaleCard :sale="flashSale" :buying="fsBuying" @buy="handleFlashBuy" />
+          </div>
         </div>
         <div class="video-info">
           <h2 class="live-title">{{ liveRoom.title }}</h2>
@@ -97,11 +101,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getLiveDetail, getHistoryMessages, getLiveProducts } from '@/api/live'
+import { getLiveDetail, getHistoryMessages, getLiveProducts, getActiveFlashSale, buyFlashSale } from '@/api/live'
 import { addToCart } from '@/api/cart'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 import LiveDanmu from '@/components/LiveDanmu.vue'
+import FlashSaleCard from '@/components/FlashSaleCard.vue'
 import { VideoCameraFilled, View, Picture, ShoppingCart } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
@@ -119,6 +124,11 @@ const videoError = ref(false)
 const liveProducts = ref([])
 const cartStore = useCartStore()
 
+// 🆕 闪购秒杀状态（Phase 2 - F3）
+const flashSale = ref(null)
+const fsBuying = ref(false)
+let fsEndTimer = null
+
 let ws = null
 let flvPlayer = null
 
@@ -127,20 +137,66 @@ async function fetchDetail() {
   try {
     const res = await getLiveDetail(route.params.id)
     liveRoom.value = res.data
-    // 加载历史弹幕
+    // 加载历史弹幕（修复：后端分页接口返回 {list,total,...}，且参数为 page/size 两个数字）
     try {
-      const msgRes = await getHistoryMessages(route.params.id, { page: 1, size: 50 })
-      messages.value = msgRes.data || []
+      const msgRes = await getHistoryMessages(route.params.id, 1, 50)
+      messages.value = msgRes.data?.list || []
     } catch (e) { /* ignore */ }
     // 加载直播间商品
     try {
       const prodRes = await getLiveProducts(route.params.id)
       liveProducts.value = prodRes.data || []
     } catch (e) { /* ignore */ }
+    // 🆕 中途进入直播间时恢复进行中的秒杀卡片
+    loadActiveFlashSale()
   } catch (e) {
     console.error(e)
   } finally {
     loading.value = false
+  }
+}
+
+async function loadActiveFlashSale() {
+  try {
+    const res = await getActiveFlashSale(route.params.id)
+    flashSale.value = res.data || null
+  } catch (e) {
+    flashSale.value = null
+  }
+}
+
+// 🆕 处理秒杀 WebSocket 事件：START/STOCK_UPDATE 更新卡片，END 展示终态 3 秒后收起
+function handleFlashSaleEvent(data) {
+  if (!data || !data.action) return
+  if (fsEndTimer) {
+    clearTimeout(fsEndTimer)
+    fsEndTimer = null
+  }
+  if (data.action === 'START' || data.action === 'STOCK_UPDATE') {
+    flashSale.value = data.sale
+  } else if (data.action === 'END') {
+    flashSale.value = data.sale ? { ...data.sale, status: 1 } : null
+    if (flashSale.value) {
+      fsEndTimer = setTimeout(() => { flashSale.value = null }, 3000)
+    }
+  }
+}
+
+async function handleFlashBuy(sale) {
+  if (!userStore.isLoggedIn) {
+    router.push('/login')
+    return
+  }
+  fsBuying.value = true
+  try {
+    const res = await buyFlashSale(sale.id, 1)
+    ElMessage.success('🎉 抢购成功！5 分钟内完成支付哦，正在跳转收银台…')
+    router.push(`/order/pay/${res.data}`)
+  } catch (e) {
+    // 拦截器已展示后端错误信息（已抢空/限购/已结束等）
+    loadActiveFlashSale() // 抢购失败时刷新一次卡片状态
+  } finally {
+    fsBuying.value = false
   }
 }
 
@@ -168,11 +224,20 @@ function initFlvPlayer() {
 function initWebSocket() {
   const id = route.params.id
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-  ws = new WebSocket(`${protocol}//${window.location.host}/ws/live/${id}`)
+  // 🆕 修复：后端要求 token 查询参数鉴权，缺失会直接拒绝连接
+  const token = localStorage.getItem('token') || ''
+  ws = new WebSocket(`${protocol}//${window.location.host}/ws/live/${id}?token=${encodeURIComponent(token)}`)
   ws.onmessage = (event) => {
     try {
       const msg = JSON.parse(event.data)
-      messages.value.push(msg)
+      // 🆕 修复：按信封 type 分发 —— 弹幕取 data 内层（与历史弹幕实体格式对齐），秒杀事件单独处理
+      if (msg.type === 'flash_sale') {
+        handleFlashSaleEvent(msg.data)
+      } else if (msg.type === 'message' && msg.data) {
+        messages.value.push(msg.data)
+      } else {
+        messages.value.push(msg)
+      }
     } catch (e) {
       console.error('WebSocket message parse error', e)
     }
@@ -220,6 +285,10 @@ onMounted(async () => {
 
 onUnmounted(() => {
   ws?.close()
+  if (fsEndTimer) {
+    clearTimeout(fsEndTimer)
+    fsEndTimer = null
+  }
   if (flvPlayer) {
     flvPlayer.pause()
     flvPlayer.unload()
@@ -296,6 +365,13 @@ onUnmounted(() => {
   color: #fff;
   gap: 12px;
   font-size: 16px;
+}
+/* 🆕 秒杀卡片悬浮层：视频区左下角 */
+.flash-sale-overlay {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 20;
 }
 .video-info {
   padding: 12px 0;

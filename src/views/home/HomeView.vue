@@ -41,16 +41,15 @@
         </div>
       </section>
 
-      <!-- 热门商品 -->
-      <section class="section">
-        <div class="section-header">
-          <h2 class="section-title">🔥 热门商品</h2>
-          <router-link to="/products" class="section-more">查看全部 ›</router-link>
-        </div>
-        <template v-if="productLoading">
+      <!-- 个性化商品分区 -->
+      <template v-if="feedLoading">
+        <section class="section" v-for="n in 2" :key="'skel'+n">
+          <div class="section-header">
+            <h2 class="section-title skeleton-title">&nbsp;</h2>
+          </div>
           <el-row :gutter="20">
-            <el-col :span="6" v-for="n in 8" :key="n">
-              <el-skeleton animated :loading="true">
+            <el-col :span="6" v-for="m in 8" :key="m">
+              <el-skeleton animated>
                 <template #template>
                   <el-skeleton-item variant="image" style="width: 100%; height: 200px" />
                   <div style="padding: 12px">
@@ -61,24 +60,49 @@
               </el-skeleton>
             </el-col>
           </el-row>
-        </template>
-        <template v-else>
+        </section>
+      </template>
+
+      <template v-else>
+        <section class="section" v-for="section in feedSections" :key="section.key">
+          <div class="section-header">
+            <div class="section-title-row">
+              <h2 class="section-title">{{ section.title }}</h2>
+              <span class="section-subtitle">{{ section.subtitle }}</span>
+            </div>
+            <router-link :to="section.link" class="section-more">查看全部 ›</router-link>
+          </div>
           <el-row :gutter="20">
-            <el-col :span="6" v-for="product in productList" :key="product.id" class="product-col">
-              <ProductCard :product="product" />
+            <el-col :span="6" v-for="product in section.products" :key="product.id" class="product-col">
+              <div class="feed-product-card" @click="$router.push(`/product/${product.id}`)">
+                <div class="feed-product-img">
+                  <el-image :src="product.coverImage" fit="cover" style="width:100%;height:200px">
+                    <template #error>
+                      <div class="img-placeholder"><el-icon :size="40"><Picture /></el-icon></div>
+                    </template>
+                  </el-image>
+                  <span class="product-tag" v-if="product.tag">{{ product.tag }}</span>
+                </div>
+                <div class="feed-product-info">
+                  <h4 class="feed-product-name">{{ product.name }}</h4>
+                  <div class="feed-product-meta">
+                    <span class="feed-product-price">¥{{ product.price }}</span>
+                    <span class="feed-product-shop">{{ product.shopName }}</span>
+                  </div>
+                </div>
+              </div>
             </el-col>
           </el-row>
-        </template>
-      </section>
+        </section>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getProductList } from '@/api/product'
+import { getHomeFeed } from '@/api/product'
 import { getLiveList } from '@/api/live'
-import ProductCard from '@/components/ProductCard.vue'
 
 const banners = [
   { title: 'GlobalShop 全球好物', desc: '精选全球优质商品，品质生活从这里开始', bg: 'linear-gradient(135deg, #409eff 0%, #79bbff 100%)' },
@@ -88,12 +112,12 @@ const banners = [
 ]
 
 const liveList = ref([])
-const productList = ref([])
-const productLoading = ref(true)
+const feedSections = ref([])
+const feedLoading = ref(true)
 
 onMounted(() => {
   loadLiveList()
-  loadProducts()
+  loadFeed()
 })
 
 async function loadLiveList() {
@@ -105,15 +129,18 @@ async function loadLiveList() {
   }
 }
 
-async function loadProducts() {
-  productLoading.value = true
+async function loadFeed() {
+  feedLoading.value = true
   try {
-    const res = await getProductList()
-    productList.value = res.data || []
+    const res = await getHomeFeed()
+    if (res.code === 200 && res.data) {
+      feedSections.value = res.data.sections || []
+    }
   } catch {
-    productList.value = []
+    // 失败时显示空，不阻塞页面
+    feedSections.value = []
   } finally {
-    productLoading.value = false
+    feedLoading.value = false
   }
 }
 </script>
@@ -246,5 +273,87 @@ async function loadProducts() {
 
 .product-col {
   margin-bottom: 20px;
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.section-subtitle {
+  font-size: 14px;
+  color: #909399;
+  font-weight: 400;
+}
+.skeleton-title {
+  width: 200px;
+  height: 28px;
+  background: #e8e8e8;
+  border-radius: 4px;
+}
+
+/* 首页 Feed 商品卡片 */
+.feed-product-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+.feed-product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+.feed-product-img {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  background: #f5f7fa;
+}
+.img-placeholder {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f7fa;
+  color: #dcdfe6;
+}
+.product-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #f56c6c;
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.feed-product-info {
+  padding: 12px 14px;
+}
+.feed-product-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #303133;
+  margin: 0 0 8px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.feed-product-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.feed-product-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: #f56c6c;
+}
+.feed-product-shop {
+  font-size: 12px;
+  color: #909399;
 }
 </style>
