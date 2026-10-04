@@ -49,26 +49,45 @@
         </el-col>
       </el-row>
 
-      <!-- ====== 客户画像分布（Tier 2.3） ====== -->
+      <!-- ====== 客户画像分布（Tier 2.3，ECharts 环形图 + 明细） ====== -->
       <el-card class="analytics-card" shadow="hover" v-if="data.customerTiers">
         <template #header><h3>👥 客户画像分布</h3></template>
-        <div v-for="(count, tier) in data.customerTiers" :key="tier" class="tier-row">
-          <span class="tier-label">{{ tierIcon(tier) }} {{ tierName(tier) }}</span>
-          <el-progress
-            :percentage="tierPercent(tier, count)"
-            :color="tierColor(tier)"
-            :stroke-width="20"
-            :show-text="false"
-            style="flex: 1; margin: 0 12px;"
-          />
-          <span class="tier-count">{{ count }} 人</span>
+        <div class="tier-layout" v-if="tierOption">
+          <EChartBase :option="tierOption" :height="240" class="tier-chart" />
+          <div class="tier-rows">
+            <div v-for="(count, tier) in data.customerTiers" :key="tier" class="tier-row">
+              <span class="tier-label">{{ tierIcon(tier) }} {{ tierName(tier) }}</span>
+              <el-progress
+                :percentage="tierPercent(tier, count)"
+                :color="tierColor(tier)"
+                :stroke-width="20"
+                :show-text="false"
+                style="flex: 1; margin: 0 12px;"
+              />
+              <span class="tier-count">{{ count }} 人</span>
+            </div>
+          </div>
+        </div>
+        <div v-else>
+          <div v-for="(count, tier) in data.customerTiers" :key="tier" class="tier-row">
+            <span class="tier-label">{{ tierIcon(tier) }} {{ tierName(tier) }}</span>
+            <el-progress
+              :percentage="tierPercent(tier, count)"
+              :color="tierColor(tier)"
+              :stroke-width="20"
+              :show-text="false"
+              style="flex: 1; margin: 0 12px;"
+            />
+            <span class="tier-count">{{ count }} 人</span>
+          </div>
         </div>
       </el-card>
 
-      <!-- ====== 商品转化 Top 5（Tier 2.3） ====== -->
+      <!-- ====== 商品转化 Top 5（Tier 2.3，ECharts 横向条形图 + 明细表） ====== -->
       <el-card class="analytics-card" shadow="hover" v-if="data.productConversion && data.productConversion.length > 0">
         <template #header><h3>📊 商品转化 Top 5</h3></template>
-        <el-table :data="data.productConversion" size="small" stripe>
+        <EChartBase v-if="convOption" :option="convOption" :height="convChartHeight" />
+        <el-table :data="data.productConversion" size="small" stripe style="margin-top: 12px;">
           <el-table-column prop="productName" label="商品名" />
           <el-table-column prop="views" label="浏览数" width="80" />
           <el-table-column prop="orders" label="下单数" width="80" />
@@ -122,8 +141,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getDashboard } from '@/api/merchant'
+import EChartBase from '@/components/EChartBase.vue'
 
 const loading = ref(true)
 const data = ref({})
@@ -149,6 +169,86 @@ function tierPercent(tier, count) {
   const total = Object.values(data.value.customerTiers || {}).reduce((s, c) => s + c, 0)
   return total > 0 ? Math.round((count / total) * 100) : 0
 }
+
+/** 客户分层环形图；全部为 0 时不渲染（回退进度条视图） */
+const tierOption = computed(() => {
+  const tiers = data.value.customerTiers
+  if (!tiers) return null
+  const entries = Object.entries(tiers)
+  if (!entries.some(([, c]) => c > 0)) return null
+  return {
+    tooltip: { trigger: 'item', formatter: '{b}：{c} 人（{d}%）' },
+    legend: { bottom: 0, icon: 'circle', itemWidth: 8, itemHeight: 8, textStyle: { color: '#606266', fontSize: 12 } },
+    series: [{
+      type: 'pie',
+      radius: ['42%', '68%'],
+      center: ['50%', '44%'],
+      avoidLabelOverlap: true,
+      label: { show: false },
+      data: entries.map(([tier, count]) => ({
+        name: tierName(tier),
+        value: count,
+        itemStyle: { color: tierColor(tier) }
+      }))
+    }]
+  }
+})
+
+/** 商品转化横向双系列条形图 */
+const convOption = computed(() => {
+  const list = data.value.productConversion
+  if (!list || !list.length) return null
+  return {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      formatter(params) {
+        const row = list[params[0].dataIndex] || {}
+        const lines = [`<b>${row.productName}</b>`]
+        for (const p of params) lines.push(`${p.marker}${p.seriesName}：${p.value}`)
+        lines.push(`转化率：${row.conversionRate ?? 'N/A'}`)
+        return lines.join('<br/>')
+      }
+    },
+    legend: { top: 0, itemWidth: 12, itemHeight: 8, textStyle: { color: '#606266', fontSize: 12 } },
+    grid: { left: 8, right: 30, top: 30, bottom: 4, containLabel: true },
+    xAxis: {
+      type: 'value',
+      minInterval: 1,
+      axisLabel: { color: '#909399', fontSize: 11 },
+      splitLine: { lineStyle: { color: '#f0f2f5', type: 'dashed' } }
+    },
+    yAxis: {
+      type: 'category',
+      data: list.map(i => i.productName),
+      inverse: true,
+      axisLabel: { color: '#606266', fontSize: 12, width: 130, overflow: 'truncate' },
+      axisTick: { show: false },
+      axisLine: { lineStyle: { color: '#e4e7ed' } }
+    },
+    series: [
+      {
+        name: '浏览数',
+        type: 'bar',
+        data: list.map(i => i.views),
+        barMaxWidth: 13,
+        itemStyle: { color: '#409eff', borderRadius: [0, 7, 7, 0] }
+      },
+      {
+        name: '下单数',
+        type: 'bar',
+        data: list.map(i => i.orders),
+        barMaxWidth: 13,
+        itemStyle: { color: '#67c23a', borderRadius: [0, 7, 7, 0] }
+      }
+    ]
+  }
+})
+
+const convChartHeight = computed(() => {
+  const n = (data.value.productConversion || []).length
+  return Math.max(220, n * 44 + 70)
+})
 
 function convTagType(rate) {
   if (rate === 'N/A') return 'info'
@@ -178,6 +278,13 @@ function convTagType(rate) {
 }
 
 /* 客户画像 */
+.tier-layout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tier-chart { flex: 0 0 46%; min-width: 0; }
+.tier-rows { flex: 1; min-width: 0; }
 .tier-row {
   display: flex;
   align-items: center;

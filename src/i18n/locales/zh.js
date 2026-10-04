@@ -167,6 +167,8 @@ export default {
     statusFailed: '未成团',
     failedHint: '超时未成团，已支付金额已自动原路退款',
     inviteFriends: '邀请好友参团',
+    shareScanHint: '好友扫码直接进入本团参团',
+    copyLink: '复制链接',
     linkCopied: '分享链接已复制，快发给好友吧',
     recordMissing: '还差 {count} 人成团',
     memberSlots: '成员坑位（{current}/{required}）',

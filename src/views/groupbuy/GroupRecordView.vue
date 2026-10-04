@@ -77,6 +77,17 @@
           {{ $t('groupbuy.viewProduct') }}
         </el-button>
       </div>
+
+      <!-- 分享弹窗：扫码参团 + 复制链接 -->
+      <el-dialog v-model="shareVisible" :title="$t('groupbuy.inviteFriends')" width="320px" align-center>
+        <div class="share-body">
+          <div class="qr-wrap">
+            <QrcodeVue :value="shareUrl" :size="200" level="M" render-as="canvas" />
+          </div>
+          <div class="share-hint">{{ $t('groupbuy.shareScanHint') }}</div>
+          <el-button type="primary" plain @click="copyShareLink">{{ $t('groupbuy.copyLink') }}</el-button>
+        </div>
+      </el-dialog>
     </template>
 
     <el-empty v-else-if="!loading" :description="$t('groupbuy.recordNotFound')">
@@ -86,12 +97,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Picture, Share } from '@element-plus/icons-vue'
+import QrcodeVue from 'qrcode.vue'
 import { getGroupRecord, joinGroup } from '@/api/groupBuy'
+import { useCountdown } from '@/composables/useCountdown'
 import { useLocaleStore } from '@/stores/locale'
 import { useUserStore } from '@/stores/user'
 
@@ -104,8 +117,15 @@ const userStore = useUserStore()
 const record = ref(null)
 const loading = ref(false)
 const joining = ref(false)
-const countdown = ref('')
-let timer = null
+const shareVisible = ref(false)
+const shareUrl = ref('')
+
+// dayjs 解析 + 统一格式（超 24h 显示"N天 HH:MM:SS"，开团时长最长 168h 也能正常展示）
+const { hasTarget, expired: cdExpired, text: cdText } = useCountdown(
+  () => (record.value && record.value.status === 0 && record.value.expireTime) ? record.value.expireTime : null,
+  { onExpire: () => loadRecord() } // 已到期，刷新状态
+)
+const countdown = computed(() => (hasTarget.value && !cdExpired.value) ? cdText.value : '')
 
 const emptySlots = computed(() => {
   if (!record.value) return 0
@@ -115,34 +135,6 @@ const emptySlots = computed(() => {
 function formatTime(str) {
   if (!str) return ''
   return String(str).replace('T', ' ').substring(0, 16)
-}
-
-function startCountdown() {
-  stopCountdown()
-  timer = setInterval(() => {
-    if (!record.value || record.value.status !== 0 || !record.value.expireTime) {
-      countdown.value = ''
-      return
-    }
-    const remain = new Date(record.value.expireTime).getTime() - Date.now()
-    if (remain <= 0) {
-      countdown.value = '00:00:00'
-      loadRecord() // 已到期，刷新状态
-      return
-    }
-    const s = Math.floor(remain / 1000)
-    const h = String(Math.floor(s / 3600)).padStart(2, '0')
-    const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0')
-    const sec = String(s % 60).padStart(2, '0')
-    countdown.value = `${h}:${m}:${sec}`
-  }, 1000)
-}
-
-function stopCountdown() {
-  if (timer) {
-    clearInterval(timer)
-    timer = null
-  }
 }
 
 async function loadRecord() {
@@ -177,22 +169,21 @@ async function handleJoin() {
   }
 }
 
-async function handleShare() {
-  const url = window.location.href
+function handleShare() {
+  shareUrl.value = window.location.href
+  shareVisible.value = true
+}
+
+async function copyShareLink() {
   try {
-    await navigator.clipboard.writeText(url)
+    await navigator.clipboard.writeText(shareUrl.value)
     ElMessage.success(t('groupbuy.linkCopied'))
   } catch {
-    ElMessage.info(url)
+    ElMessage.info(shareUrl.value)
   }
 }
 
-onMounted(() => {
-  loadRecord()
-  startCountdown()
-})
-
-onBeforeUnmount(stopCountdown)
+onMounted(loadRecord)
 </script>
 
 <style scoped>
@@ -369,5 +360,23 @@ onBeforeUnmount(stopCountdown)
 
 .my-status-alert {
   border-radius: 10px;
+}
+
+/* 分享弹窗 */
+.share-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.qr-wrap {
+  padding: 12px;
+  border: 1px solid #ebeef5;
+  border-radius: 12px;
+  background: #fff;
+}
+.share-hint {
+  font-size: 13px;
+  color: #909399;
 }
 </style>

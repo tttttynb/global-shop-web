@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
 import MerchantLayout from '@/layouts/MerchantLayout.vue'
 
@@ -59,14 +61,19 @@ const router = createRouter({
   routes
 })
 
-// 导航守卫
+// 导航守卫 + 顶部加载进度条
 router.beforeEach((to, from, next) => {
+  NProgress.start()
   const token = localStorage.getItem('token')
   if (to.meta.requiresAuth && !token) {
     next({ path: '/login', query: { redirect: to.fullPath } })
   } else {
     next()
   }
+})
+
+router.afterEach(() => {
+  NProgress.done()
 })
 
 export default router

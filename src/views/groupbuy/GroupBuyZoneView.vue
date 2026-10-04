@@ -105,6 +105,7 @@ import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { Picture } from '@element-plus/icons-vue'
 import { getGroupActivities, getOngoingGroups, openGroup, joinGroup, getMyGroups } from '@/api/groupBuy'
+import { parseTime, formatDuration } from '@/composables/useCountdown'
 import { useLocaleStore } from '@/stores/locale'
 import { useUserStore } from '@/stores/user'
 
@@ -172,8 +173,10 @@ function startCountdown() {
     const map = {}
     for (const g of myGroups.value) {
       if (g.status === 0 && g.expireTime) {
-        const remain = new Date(g.expireTime).getTime() - Date.now()
-        map[g.recordId] = remain > 0 ? humanize(remain) : '00:00:00'
+        const end = parseTime(g.expireTime)
+        if (!end) continue
+        const remain = end.valueOf() - Date.now()
+        map[g.recordId] = remain > 0 ? formatDuration(remain) : '00:00:00'
       }
     }
     countdowns.value = map
@@ -185,14 +188,6 @@ function stopCountdown() {
     clearInterval(tickTimer)
     tickTimer = null
   }
-}
-
-function humanize(ms) {
-  const s = Math.floor(ms / 1000)
-  const h = String(Math.floor(s / 3600)).padStart(2, '0')
-  const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0')
-  const sec = String(s % 60).padStart(2, '0')
-  return `${h}:${m}:${sec}`
 }
 
 function formatTime(str) {

@@ -198,7 +198,7 @@
           </div>
         </div>
 
-        <!-- 🆕 价格走势（Phase 1 - F2，内联 SVG 零依赖） -->
+        <!-- 🆕 价格走势（Phase 1 - F2，ECharts 版，多币种跟随换算） -->
         <div class="price-history-section" v-if="priceHistory.length >= 2">
           <div class="ph-header">
             <h2 class="section-title ph-title">{{ $t('product.phTitle') }}</h2>
@@ -208,11 +208,7 @@
               <span>{{ $t('product.phCurrent') }} <strong class="ph-current">{{ localeStore.formatPrice(phCurrent) }}</strong></span>
             </div>
           </div>
-          <svg :viewBox="`0 0 ${phW} ${phH}`" class="ph-chart" preserveAspectRatio="none">
-            <polyline :points="phAreaPoints" fill="rgba(245,108,108,0.08)" stroke="none" />
-            <polyline :points="phLinePoints" fill="none" stroke="#f56c6c" stroke-width="2" vector-effect="non-scaling-stroke" />
-            <circle v-for="(p, i) in phDotPoints" :key="i" :cx="p.x" :cy="p.y" r="3" fill="#f56c6c" vector-effect="non-scaling-stroke" />
-          </svg>
+          <PriceTrendChart :history="priceHistory" />
         </div>
 
         <!-- 🗣️ AI 口碑档案 2.0（Phase 4 - F9：持久化档案 + 买家印象标签墙，优先于实时 AI 总结） -->
@@ -388,6 +384,7 @@ import { subscribePriceAlert, unsubscribePriceAlert, subscribeRestockAlert, unsu
 import { useCartStore } from '@/stores/cart'
 import { useUserStore } from '@/stores/user'
 import { useLocaleStore, CURRENCY_OPTIONS } from '@/stores/locale'
+import PriceTrendChart from '@/components/PriceTrendChart.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -419,8 +416,6 @@ const selectedSku = ref(null)
 
 // 🆕 价格历史状态（Phase 1 - F2）
 const priceHistory = ref([])
-const phW = 1000
-const phH = 160
 
 // 🆕 跨境税费试算状态（Phase 3 - F6）
 const taxEstimate = ref(null)
@@ -735,29 +730,6 @@ const phPrices = computed(() => priceHistory.value.map(h => Number(h.price)))
 const phMin = computed(() => (phPrices.value.length ? Math.min(...phPrices.value).toFixed(2) : '0.00'))
 const phMax = computed(() => (phPrices.value.length ? Math.max(...phPrices.value).toFixed(2) : '0.00'))
 const phCurrent = computed(() => (phPrices.value.length ? phPrices.value[phPrices.value.length - 1].toFixed(2) : '0.00'))
-
-const phDotPoints = computed(() => {
-  const prices = phPrices.value
-  if (prices.length < 2) return []
-  const min = Math.min(...prices)
-  const max = Math.max(...prices)
-  const span = max - min || 1
-  const pad = 12
-  return prices.map((p, i) => ({
-    x: pad + (i / (prices.length - 1)) * (phW - pad * 2),
-    y: phH - pad - ((p - min) / span) * (phH - pad * 2)
-  }))
-})
-
-const phLinePoints = computed(() => phDotPoints.value.map(p => `${p.x},${p.y}`).join(' '))
-
-const phAreaPoints = computed(() => {
-  const pts = phDotPoints.value
-  if (pts.length < 2) return ''
-  const first = pts[0]
-  const last = pts[pts.length - 1]
-  return `${first.x},${phH} ` + pts.map(p => `${p.x},${p.y}`).join(' ') + ` ${last.x},${phH}`
-})
 
 async function loadReviews(id) {
   try {
@@ -1316,11 +1288,6 @@ async function handleFavorite() {
 .ph-low { color: #67c23a; }
 .ph-high { color: #f56c6c; }
 .ph-current { color: #303133; }
-.ph-chart {
-  width: 100%;
-  height: 160px;
-  margin-top: 12px;
-}
 
 /* AI 评价总结 */
 .ai-summary-section {

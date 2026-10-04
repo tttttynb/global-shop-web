@@ -52,7 +52,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { computed } from 'vue'
+import { useCountdown } from '@/composables/useCountdown'
 
 const props = defineProps({
   sale: { type: Object, default: null },
@@ -60,56 +61,18 @@ const props = defineProps({
 })
 defineEmits(['buy'])
 
-const remainSeconds = ref(0)
-const ended = ref(false)
-let timer = null
+// dayjs 解析后端时间，规避 Safari 对 "YYYY-MM-DD HH:mm:ss" 的解析问题；
+// sale 变化（新活动/进度广播）时由组合式函数自动重启计时
+const { remainMs, expired: ended, hasTarget } = useCountdown(() => props.sale?.endTime || null)
 
-function parseEndTime(endTime) {
-  if (!endTime) return null
-  // 后端 LocalDateTime 序列化为 ISO 字符串（无时区，按本地时间解析）
-  const d = new Date(typeof endTime === 'string' ? endTime.replace(' ', 'T') : endTime)
-  return isNaN(d.getTime()) ? null : d
-}
-
-function tick() {
-  const end = parseEndTime(props.sale?.endTime)
-  if (!end) return
-  const diff = Math.floor((end.getTime() - Date.now()) / 1000)
-  remainSeconds.value = Math.max(0, diff)
-  if (diff <= 0) {
-    ended.value = true
-    stopTimer()
-  }
-}
-
-function startTimer() {
-  stopTimer()
-  ended.value = false
-  tick()
-  timer = setInterval(tick, 1000)
-}
-
-function stopTimer() {
-  if (timer) {
-    clearInterval(timer)
-    timer = null
-  }
-}
+const remainSeconds = computed(() => Math.floor(remainMs.value / 1000))
 
 const countdownText = computed(() => {
   const s = remainSeconds.value
   const mm = String(Math.floor(s / 60)).padStart(2, '0')
   const ss = String(s % 60).padStart(2, '0')
-  return `⏰ ${mm}:${ss}`
+  return hasTarget.value ? `⏰ ${mm}:${ss}` : ''
 })
-
-// sale 变化（新活动/进度广播）时重置计时；END 事件由父组件直接移除卡片
-watch(() => props.sale?.id, (id) => {
-  if (id) startTimer()
-  else stopTimer()
-}, { immediate: true })
-
-onUnmounted(stopTimer)
 </script>
 
 <style scoped>

@@ -167,6 +167,8 @@ export default {
     statusFailed: '미성사',
     failedHint: '시간 초과로 미성사, 결제 금액은 자동으로 환불되었습니다',
     inviteFriends: '친구 초대',
+    shareScanHint: 'QR코드를 스캔하여 이 팀 참여',
+    copyLink: '링크 복사',
     linkCopied: '공유 링크가 복사되었습니다. 친구에게 보내보세요',
     recordMissing: '성사까지 {count}명 남음',
     memberSlots: '멤버 ({current}/{required})',

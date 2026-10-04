@@ -167,6 +167,8 @@ export default {
     statusFailed: 'Group failed',
     failedHint: 'The group timed out; paid amounts were refunded automatically',
     inviteFriends: 'Invite Friends',
+    shareScanHint: 'Friends can scan to open this group',
+    copyLink: 'Copy Link',
     linkCopied: 'Share link copied — send it to your friends',
     recordMissing: '{count} more member(s) to form the group',
     memberSlots: 'Members ({current}/{required})',

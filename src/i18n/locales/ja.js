@@ -167,6 +167,8 @@ export default {
     statusFailed: '不成立',
     failedHint: 'タイムアウトで不成立、支払い済み金額は自動的に返金されました',
     inviteFriends: '友達を招待',
+    shareScanHint: 'QRコードをスキャンしてこの団体に参加',
+    copyLink: 'リンクをコピー',
     linkCopied: '共有リンクをコピーしました。友達に送りましょう',
     recordMissing: '成立まであと {count} 人',
     memberSlots: 'メンバー（{current}/{required}）',
