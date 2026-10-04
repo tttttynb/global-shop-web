@@ -40,11 +40,16 @@ function goDetail() {
 <style scoped>
 .product-card {
   cursor: pointer;
-  transition: transform 0.2s;
+  border-radius: var(--gs-radius-lg);
+  border: 1px solid transparent;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   overflow: hidden;
+  --el-card-border-radius: var(--gs-radius-lg);
 }
 .product-card:hover {
   transform: translateY(-4px);
+  box-shadow: var(--gs-shadow-2);
+  border-color: color-mix(in srgb, var(--gs-primary) 25%, #fff);
 }
 .product-card :deep(.el-card__body) {
   padding: 0;
@@ -52,10 +57,15 @@ function goDetail() {
 .product-image {
   height: 200px;
   overflow: hidden;
+  background: var(--gs-bg-hover);
 }
 .product-image .el-image {
   width: 100%;
   height: 100%;
+  transition: transform 0.35s ease;
+}
+.product-card:hover .product-image .el-image {
+  transform: scale(1.05);
 }
 .image-placeholder {
   display: flex;
@@ -63,15 +73,16 @@ function goDetail() {
   justify-content: center;
   width: 100%;
   height: 100%;
-  background: #f5f5f5;
-  color: #ccc;
+  background: var(--gs-bg-hover);
+  color: #c9cdd4;
 }
 .product-info {
-  padding: 12px;
+  padding: 12px 14px 14px;
 }
 .product-name {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--gs-text-1);
   margin-bottom: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -79,8 +90,8 @@ function goDetail() {
 }
 .product-desc {
   font-size: 12px;
-  color: #999;
-  margin-bottom: 8px;
+  color: var(--gs-text-3);
+  margin-bottom: 10px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -88,15 +99,20 @@ function goDetail() {
 .product-bottom {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
 }
 .product-price {
-  color: #f56c6c;
-  font-size: 18px;
-  font-weight: 700;
+  color: var(--gs-price);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
 }
 .product-shop {
   font-size: 12px;
-  color: #999;
+  color: var(--gs-text-3);
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

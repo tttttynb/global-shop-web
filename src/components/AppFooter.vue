@@ -8,9 +8,10 @@
 
 <style scoped>
 .app-footer {
-  background: #333;
-  color: #999;
-  padding: 20px;
+  background: var(--gs-bg-card);
+  border-top: 1px solid var(--gs-border);
+  color: var(--gs-text-3);
+  padding: 28px 20px;
   text-align: center;
   font-size: 13px;
 }

@@ -2,7 +2,7 @@
   <header class="app-header">
     <div class="header-inner">
       <router-link to="/" class="logo">
-        <el-icon :size="24"><Shop /></el-icon>
+        <span class="logo-mark"><el-icon :size="18"><Shop /></el-icon></span>
         <span>GlobalShop</span>
       </router-link>
 
@@ -336,16 +336,16 @@ function handleLogout() {
 
 <style scoped>
 .app-header {
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  background: var(--gs-bg-card);
+  box-shadow: 0 1px 0 var(--gs-border), 0 2px 12px rgba(15, 24, 44, 0.04);
   position: sticky;
   top: 0;
   z-index: 100;
 }
 .header-inner {
-  max-width: 1200px;
+  max-width: var(--gs-container);
   margin: 0 auto;
-  height: 60px;
+  height: var(--gs-header-height);
   display: flex;
   align-items: center;
   padding: 0 20px;
@@ -354,30 +354,66 @@ function handleLogout() {
 .logo {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 20px;
-  font-weight: 700;
-  color: #409eff;
+  gap: 10px;
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--gs-text-1);
   white-space: nowrap;
+}
+.logo-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--gs-primary), #4c8dff);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(22, 93, 255, 0.35);
 }
 .nav-links {
   display: flex;
-  gap: 20px;
+  gap: 22px;
 }
 .nav-links a {
-  color: #666;
+  position: relative;
+  color: var(--gs-text-2);
   font-size: 14px;
   transition: color 0.2s;
   white-space: nowrap;
+  padding: 21px 2px;
+}
+/* 选中态下划线指示条 */
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  width: 0;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--gs-primary);
+  transform: translateX(-50%);
+  transition: width 0.2s ease;
 }
 /* 👥 拼团专区入口高亮（Phase 4 - F7） */
 .nav-links a.nav-groupbuy {
-  color: #ee0a24;
+  color: var(--gs-price);
   font-weight: 600;
 }
-.nav-links a:hover,
+.nav-links a.nav-groupbuy::after {
+  background: var(--gs-price);
+}
+.nav-links a:hover {
+  color: var(--gs-primary);
+}
 .nav-links a.router-link-active {
-  color: #409eff;
+  color: var(--gs-primary);
+  font-weight: 600;
+}
+.nav-links a.router-link-active::after {
+  width: 20px;
 }
 .header-right {
   margin-left: auto;
@@ -386,7 +422,7 @@ function handleLogout() {
   gap: 16px;
 }
 .search-box {
-  width: 280px;
+  width: 320px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -395,36 +431,49 @@ function handleLogout() {
   flex: 1;
   min-width: 0;
 }
+/* 胶囊形搜索框 */
+.search-box :deep(.el-input__wrapper) {
+  border-radius: 999px;
+}
+.search-box :deep(.el-input-group__append) {
+  border-radius: 0 999px 999px 0;
+  background: var(--gs-primary);
+  color: #fff;
+  border-color: var(--gs-primary);
+}
+.search-box :deep(.el-input-group__append .el-icon) {
+  color: #fff;
+}
 /* 🆕 以图搜图相机入口 */
 .camera-entry {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 34px;
-  height: 32px;
-  border-radius: 6px;
-  color: #666;
-  background: #f5f7fa;
+  height: 34px;
+  border-radius: var(--gs-radius);
+  color: var(--gs-text-2);
+  background: var(--gs-bg-hover);
   transition: all 0.2s;
   flex-shrink: 0;
 }
 .camera-entry:hover {
   color: #fff;
-  background: linear-gradient(135deg, #409eff, #67c23a);
+  background: var(--gs-primary);
 }
 .cart-icon {
   cursor: pointer;
-  color: #666;
+  color: var(--gs-text-2);
   display: flex;
   align-items: center;
 }
 .cart-icon:hover {
-  color: #409eff;
+  color: var(--gs-primary);
 }
 /* 🆕 语言/币种切换器（Phase 3 - F5） */
 .switcher {
   cursor: pointer;
-  color: #666;
+  color: var(--gs-text-2);
   font-size: 13px;
   white-space: nowrap;
   display: flex;
@@ -433,43 +482,43 @@ function handleLogout() {
   outline: none;
 }
 .switcher:hover {
-  color: #409eff;
+  color: var(--gs-primary);
 }
 .user-info {
   display: flex;
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  color: #666;
+  color: var(--gs-text-2);
   font-size: 14px;
 }
 .notif-icon {
   cursor: pointer;
-  color: #666;
+  color: var(--gs-text-2);
   display: flex;
   align-items: center;
 }
 .notif-icon:hover {
-  color: #409eff;
+  color: var(--gs-primary);
 }
 .notif-popover .notif-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding-bottom: 8px;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid var(--gs-divider);
   margin-bottom: 8px;
   font-weight: 600;
 }
 .notif-empty {
   text-align: center;
-  color: #909399;
+  color: var(--gs-text-3);
   padding: 20px 0;
   font-size: 13px;
 }
 .notif-item {
   padding: 10px 8px;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid var(--gs-divider);
   cursor: pointer;
   font-size: 13px;
   display: flex;
@@ -477,10 +526,10 @@ function handleLogout() {
   align-items: flex-start;
 }
 .notif-item.unread {
-  background: #ecf5ff;
+  background: color-mix(in srgb, var(--gs-primary) 8%, #fff);
 }
 .notif-item:hover {
-  background: #e8f0fe;
+  background: color-mix(in srgb, var(--gs-primary) 12%, #fff);
 }
 .notif-type {
   font-size: 16px;
@@ -494,19 +543,19 @@ function handleLogout() {
   min-width: 0;
 }
 .notif-msg {
-  color: #303133;
+  color: var(--gs-text-1);
   font-weight: 500;
   line-height: 1.4;
 }
 .notif-sub {
-  color: #909399;
+  color: var(--gs-text-3);
   font-size: 12px;
   line-height: 1.3;
 }
 .notif-footer {
   text-align: center;
   padding: 8px 0 0;
-  border-top: 1px solid #ebeef5;
+  border-top: 1px solid var(--gs-divider);
   margin-top: 4px;
 }
 </style>

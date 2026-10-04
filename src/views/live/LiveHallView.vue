@@ -96,13 +96,14 @@ onMounted(() => {
 
 <style scoped>
 .live-hall {
-  max-width: 1200px;
+  max-width: var(--gs-container);
   margin: 0 auto;
-  padding: 24px;
+  padding: 0;
 }
 .page-title {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gs-text-1);
   margin-bottom: 16px;
 }
 .hall-tabs {
@@ -116,11 +117,16 @@ onMounted(() => {
 }
 .room-card {
   cursor: pointer;
-  transition: transform 0.2s;
+  border-radius: var(--gs-radius-lg);
+  --el-card-border-radius: var(--gs-radius-lg);
+  border: 1px solid transparent;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   overflow: hidden;
 }
 .room-card:hover {
   transform: translateY(-4px);
+  box-shadow: var(--gs-shadow-2);
+  border-color: color-mix(in srgb, var(--gs-primary) 25%, #fff);
 }
 .room-card :deep(.el-card__body) {
   padding: 0;
@@ -130,6 +136,7 @@ onMounted(() => {
   width: 100%;
   padding-top: 56.25%; /* 16:9 */
   overflow: hidden;
+  background: var(--gs-bg-hover);
 }
 .cover-img {
   position: absolute;
@@ -137,6 +144,10 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 100%;
+  transition: transform 0.35s ease;
+}
+.room-card:hover .cover-img {
+  transform: scale(1.05);
 }
 .cover-placeholder {
   display: flex;
@@ -160,7 +171,7 @@ onMounted(() => {
   gap: 4px;
 }
 .status-badge.live {
-  background: rgba(245, 63, 63, 0.85);
+  background: color-mix(in srgb, var(--gs-price) 88%, transparent);
 }
 .status-badge.offline {
   background: rgba(0, 0, 0, 0.5);
@@ -190,11 +201,12 @@ onMounted(() => {
   gap: 4px;
 }
 .room-info {
-  padding: 12px;
+  padding: 12px 14px 14px;
 }
 .room-title {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--gs-text-1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -202,6 +214,6 @@ onMounted(() => {
 }
 .room-shop {
   font-size: 12px;
-  color: #999;
+  color: var(--gs-text-3);
 }
 </style>

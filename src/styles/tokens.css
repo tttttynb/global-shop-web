@@ -1,0 +1,61 @@
+/* ============================================================
+   全站设计令牌（清爽电商风）
+   改版只动这里：品牌色 / 价格色 / 圆角 / 阴影 / 文字层级
+   下半部分把令牌映射到 Element Plus 变量，全站组件一键换肤
+   ============================================================ */
+:root {
+  /* ===== 品牌色 ===== */
+  --gs-primary: #165dff;          /* 主色：电商蓝 */
+  --gs-primary-hover: #4080ff;
+  --gs-primary-active: #0e42d2;
+  --gs-price: #ee0a24;            /* 价格/促销红 */
+  --gs-success: #00b578;
+  --gs-warning: #ff8f1f;
+
+  /* ===== 背景与描边 ===== */
+  --gs-bg-page: #f4f5f7;          /* 页面底色（内容卡片浮在其上） */
+  --gs-bg-card: #ffffff;
+  --gs-bg-hover: #f2f3f5;
+  --gs-border: #e5e6eb;
+  --gs-divider: #f2f3f5;
+
+  /* ===== 文字层级 ===== */
+  --gs-text-1: #1d2129;           /* 标题/强调 */
+  --gs-text-2: #4e5969;           /* 正文 */
+  --gs-text-3: #86909c;           /* 辅助/占位 */
+
+  /* ===== 圆角 ===== */
+  --gs-radius-sm: 6px;
+  --gs-radius: 10px;
+  --gs-radius-lg: 14px;
+
+  /* ===== 阴影 ===== */
+  --gs-shadow-1: 0 1px 4px rgba(15, 24, 44, 0.05);     /* 卡片常态 */
+  --gs-shadow-2: 0 8px 24px rgba(15, 24, 44, 0.10);    /* 悬浮/下拉 */
+
+  /* ===== 布局 ===== */
+  --gs-container: 1200px;         /* 内容区最大宽度 */
+  --gs-header-height: 64px;
+
+  /* ===== Element Plus 变量映射 ===== */
+  --el-color-primary: var(--gs-primary);
+  --el-color-primary-dark-2: var(--gs-primary-active);
+  --el-color-primary-light-3: color-mix(in srgb, var(--gs-primary) 70%, #fff);
+  --el-color-primary-light-5: color-mix(in srgb, var(--gs-primary) 50%, #fff);
+  --el-color-primary-light-7: color-mix(in srgb, var(--gs-primary) 30%, #fff);
+  --el-color-primary-light-8: color-mix(in srgb, var(--gs-primary) 20%, #fff);
+  --el-color-primary-light-9: color-mix(in srgb, var(--gs-primary) 10%, #fff);
+  --el-color-success: var(--gs-success);
+  --el-color-warning: var(--gs-warning);
+  --el-color-danger: var(--gs-price);
+  --el-color-error: var(--gs-price);
+  --el-border-radius-base: var(--gs-radius-sm);
+  --el-border-color: var(--gs-border);
+  --el-border-color-light: var(--gs-border);
+  --el-border-color-lighter: var(--gs-divider);
+  --el-text-color-primary: var(--gs-text-1);
+  --el-text-color-regular: var(--gs-text-2);
+  --el-text-color-secondary: var(--gs-text-3);
+  --el-fill-color-light: var(--gs-bg-hover);
+  --el-box-shadow-light: var(--gs-shadow-2);
+}

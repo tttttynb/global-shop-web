@@ -105,10 +105,10 @@ import { getHomeFeed } from '@/api/product'
 import { getLiveList } from '@/api/live'
 
 const banners = [
-  { title: 'GlobalShop 全球好物', desc: '精选全球优质商品，品质生活从这里开始', bg: 'linear-gradient(135deg, #409eff 0%, #79bbff 100%)' },
-  { title: '新品首发 限时优惠', desc: '海量新品低至5折，先到先得', bg: 'linear-gradient(135deg, #f56c6c 0%, #fab6b6 100%)' },
-  { title: '直播购物 互动体验', desc: '主播在线讲解，边看边买更放心', bg: 'linear-gradient(135deg, #67c23a 0%, #b3e19d 100%)' },
-  { title: 'AI 智能推荐', desc: '千人千面，为你推荐最合适的好物', bg: 'linear-gradient(135deg, #e6a23c 0%, #f3d19e 100%)' }
+  { title: 'GlobalShop 全球好物', desc: '精选全球优质商品，品质生活从这里开始', bg: 'linear-gradient(135deg, #165dff 0%, #69a0ff 100%)' },
+  { title: '新品首发 限时优惠', desc: '海量新品低至5折，先到先得', bg: 'linear-gradient(135deg, #ee0a24 0%, #ff7a6e 100%)' },
+  { title: '直播购物 互动体验', desc: '主播在线讲解，边看边买更放心', bg: 'linear-gradient(135deg, #00b578 0%, #7be0b4 100%)' },
+  { title: 'AI 智能推荐', desc: '千人千面，为你推荐最合适的好物', bg: 'linear-gradient(135deg, #ff8f1f 0%, #ffc46e 100%)' }
 ]
 
 const liveList = ref([])
@@ -147,11 +147,15 @@ async function loadFeed() {
 
 <style scoped>
 .home-page {
-  background: #f5f7fa;
+  background: var(--gs-bg-page);
   min-height: 100%;
 }
 .banner-carousel {
-  border-radius: 0;
+  max-width: var(--gs-container);
+  margin: 0 auto;
+  border-radius: var(--gs-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--gs-shadow-1);
 }
 .banner-item {
   height: 100%;
@@ -165,22 +169,23 @@ async function loadFeed() {
 }
 .banner-content h2 {
   font-size: 36px;
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: 12px;
+  letter-spacing: 1px;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 .banner-content p {
   font-size: 18px;
-  opacity: 0.9;
+  opacity: 0.92;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 .home-container {
-  max-width: 1200px;
+  max-width: var(--gs-container);
   margin: 0 auto;
-  padding: 30px 20px 60px;
+  padding: 32px 20px 64px;
 }
 .section {
-  margin-bottom: 40px;
+  margin-bottom: 44px;
 }
 .section-header {
   display: flex;
@@ -189,17 +194,29 @@ async function loadFeed() {
   margin-bottom: 20px;
 }
 .section-title {
-  font-size: 22px;
-  font-weight: 600;
-  color: #303133;
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gs-text-1);
+}
+/* 标题主色竖条 */
+.section-title::before {
+  content: '';
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background: var(--gs-primary);
+  margin-right: 10px;
 }
 .section-more {
-  color: #409eff;
+  color: var(--gs-text-3);
   text-decoration: none;
   font-size: 14px;
+  transition: color 0.2s;
 }
 .section-more:hover {
-  text-decoration: underline;
+  color: var(--gs-primary);
 }
 
 /* 直播横向滚动 */
@@ -216,10 +233,13 @@ async function loadFeed() {
   width: 220px;
   flex-shrink: 0;
   cursor: pointer;
-  transition: transform 0.2s;
+  border-radius: var(--gs-radius-lg);
+  --el-card-border-radius: var(--gs-radius-lg);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .live-card:hover {
   transform: translateY(-4px);
+  box-shadow: var(--gs-shadow-2);
 }
 .live-card :deep(.el-card__body) {
   padding: 0;
@@ -228,6 +248,7 @@ async function loadFeed() {
   position: relative;
   height: 140px;
   overflow: hidden;
+  background: var(--gs-bg-hover);
 }
 .live-cover-img {
   width: 100%;
@@ -239,14 +260,14 @@ async function loadFeed() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #409eff33, #79bbff33);
-  color: #409eff;
+  background: color-mix(in srgb, var(--gs-primary) 8%, #fff);
+  color: var(--gs-primary);
 }
 .live-badge {
   position: absolute;
   top: 8px;
   left: 8px;
-  background: #f56c6c;
+  background: var(--gs-price);
   color: #fff;
   font-size: 12px;
   padding: 2px 8px;
@@ -257,7 +278,8 @@ async function loadFeed() {
 }
 .live-title {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--gs-text-1);
   margin-bottom: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -265,7 +287,7 @@ async function loadFeed() {
 }
 .live-viewers {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -282,34 +304,42 @@ async function loadFeed() {
 }
 .section-subtitle {
   font-size: 14px;
-  color: #909399;
+  color: var(--gs-text-3);
   font-weight: 400;
 }
 .skeleton-title {
   width: 200px;
   height: 28px;
-  background: #e8e8e8;
+  background: var(--gs-bg-hover);
   border-radius: 4px;
 }
 
-/* 首页 Feed 商品卡片 */
+/* 首页 Feed 商品卡片（与 ProductCard 同一套观感规范） */
 .feed-product-card {
-  background: #fff;
-  border-radius: 10px;
+  background: var(--gs-bg-card);
+  border: 1px solid transparent;
+  border-radius: var(--gs-radius-lg);
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  box-shadow: var(--gs-shadow-1);
 }
 .feed-product-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  box-shadow: var(--gs-shadow-2);
+  border-color: color-mix(in srgb, var(--gs-primary) 25%, #fff);
 }
 .feed-product-img {
   position: relative;
   height: 200px;
   overflow: hidden;
-  background: #f5f7fa;
+  background: var(--gs-bg-hover);
+}
+.feed-product-img .el-image {
+  transition: transform 0.35s ease;
+}
+.feed-product-card:hover .feed-product-img .el-image {
+  transform: scale(1.05);
 }
 .img-placeholder {
   width: 100%;
@@ -317,26 +347,26 @@ async function loadFeed() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f7fa;
-  color: #dcdfe6;
+  background: var(--gs-bg-hover);
+  color: #c9cdd4;
 }
 .product-tag {
   position: absolute;
   top: 8px;
   left: 8px;
-  background: #f56c6c;
+  background: var(--gs-price);
   color: #fff;
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 10px;
 }
 .feed-product-info {
-  padding: 12px 14px;
+  padding: 12px 14px 14px;
 }
 .feed-product-name {
   font-size: 14px;
-  font-weight: 500;
-  color: #303133;
+  font-weight: 600;
+  color: var(--gs-text-1);
   margin: 0 0 8px 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -344,16 +374,17 @@ async function loadFeed() {
 }
 .feed-product-meta {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
 }
 .feed-product-price {
-  font-size: 18px;
-  font-weight: 700;
-  color: #f56c6c;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--gs-price);
 }
 .feed-product-shop {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 </style>

@@ -914,7 +914,7 @@ async function handleFavorite() {
 
 <style scoped>
 .product-detail-page {
-  background: #f5f7fa;
+  background: var(--gs-bg-hover);
   min-height: 100%;
   padding: 30px 0 60px;
 }
@@ -928,7 +928,7 @@ async function handleFavorite() {
   display: flex;
   gap: 40px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   padding: 30px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
@@ -949,7 +949,7 @@ async function handleFavorite() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: var(--gs-bg-hover);
   color: #dcdfe6;
 }
 .detail-info {
@@ -958,15 +958,17 @@ async function handleFavorite() {
 }
 .product-name {
   font-size: 22px;
-  font-weight: 600;
-  color: #303133;
-  margin-bottom: 16px;
+  font-weight: 700;
+  color: var(--gs-text-1);
+  margin-bottom: 14px;
   line-height: 1.4;
 }
 .product-price {
-  font-size: 32px;
-  font-weight: 700;
-  color: #f56c6c;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--gs-price);
+  font-variant-numeric: tabular-nums;
   margin-bottom: 20px;
 }
 .info-row {
@@ -975,16 +977,16 @@ async function handleFavorite() {
   gap: 12px;
   margin-bottom: 12px;
   font-size: 14px;
-  color: #606266;
+  color: var(--gs-text-2);
 }
 .info-label {
-  color: #909399;
+  color: var(--gs-text-3);
   min-width: 36px;
 }
 .product-desc {
   margin-bottom: 12px;
   font-size: 14px;
-  color: #606266;
+  color: var(--gs-text-2);
 }
 .product-desc p {
   margin-top: 4px;
@@ -1005,10 +1007,10 @@ async function handleFavorite() {
 }
 .social-item {
   font-size: 13px;
-  color: #606266;
+  color: var(--gs-text-2);
 }
 .social-item strong {
-  color: #f56c6c;
+  color: var(--gs-price);
   font-size: 15px;
 }
 
@@ -1044,16 +1046,16 @@ async function handleFavorite() {
 }
 .op-label {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 .op-amount {
   font-size: 18px;
   font-weight: 700;
-  color: #409eff;
+  color: var(--gs-primary);
 }
 .op-ref {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin-left: auto;
 }
 
@@ -1090,7 +1092,7 @@ async function handleFavorite() {
 }
 .gb-origin {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
   text-decoration: line-through;
 }
 .gb-open-btn {
@@ -1158,7 +1160,7 @@ async function handleFavorite() {
 .impression-label {
   font-size: 13px;
   font-weight: 600;
-  color: #606266;
+  color: var(--gs-text-2);
 }
 .impression-tag {
   border-radius: 14px;
@@ -1180,7 +1182,7 @@ async function handleFavorite() {
 .tax-card-title {
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
   margin-bottom: 10px;
 }
 .tax-row {
@@ -1188,28 +1190,28 @@ async function handleFavorite() {
   justify-content: space-between;
   align-items: center;
   font-size: 13px;
-  color: #606266;
+  color: var(--gs-text-2);
   padding: 4px 0;
 }
 .tax-free {
-  color: #67c23a;
+  color: var(--gs-success);
   font-weight: 600;
 }
 .tax-hint {
   font-size: 12px;
-  color: #e6a23c;
+  color: var(--gs-warning);
 }
 .tax-total {
   border-top: 1px dashed #f0c78a;
   margin-top: 6px;
   padding-top: 10px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 .tax-total-amount {
   font-size: 20px;
   font-weight: 700;
-  color: #f56c6c;
+  color: var(--gs-price);
 }
 .tax-note {
   margin-top: 8px;
@@ -1254,7 +1256,7 @@ async function handleFavorite() {
 }
 .spec-hint {
   font-size: 12px;
-  color: #e6a23c;
+  color: var(--gs-warning);
   margin-top: 2px;
 }
 
@@ -1262,7 +1264,7 @@ async function handleFavorite() {
 .price-history-section {
   margin-top: 30px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   padding: 24px 30px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
@@ -1280,21 +1282,21 @@ async function handleFavorite() {
   display: flex;
   gap: 20px;
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 .ph-stats strong {
   font-size: 15px;
 }
-.ph-low { color: #67c23a; }
-.ph-high { color: #f56c6c; }
-.ph-current { color: #303133; }
+.ph-low { color: var(--gs-success); }
+.ph-high { color: var(--gs-price); }
+.ph-current { color: var(--gs-text-1); }
 
 /* AI 评价总结 */
 .ai-summary-section {
   margin-top: 30px;
   background: linear-gradient(135deg, #fef9e7 0%, #fffdf5 100%);
   border: 1px solid #f9e79f;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   padding: 30px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
@@ -1319,16 +1321,16 @@ async function handleFavorite() {
 }
 .ai-rating-label {
   font-weight: 500;
-  color: #606266;
+  color: var(--gs-text-2);
 }
 .ai-summary-text {
   font-size: 15px;
   line-height: 1.7;
-  color: #303133;
+  color: var(--gs-text-1);
   padding: 12px 16px;
   background: #fff;
   border-radius: 8px;
-  border-left: 3px solid #e6a23c;
+  border-left: 3px solid var(--gs-warning);
 }
 .ai-pros-cons {
   display: flex;
@@ -1340,20 +1342,20 @@ async function handleFavorite() {
   background: #fff;
   border-radius: 8px;
 }
-.ai-pros h4 { color: #67c23a; margin: 0 0 8px 0; }
-.ai-cons h4 { color: #e6a23c; margin: 0 0 8px 0; }
+.ai-pros h4 { color: var(--gs-success); margin: 0 0 8px 0; }
+.ai-cons h4 { color: var(--gs-warning); margin: 0 0 8px 0; }
 .ai-pros ul, .ai-cons ul {
   margin: 0;
   padding-left: 18px;
 }
 .ai-pros li, .ai-cons li {
   font-size: 14px;
-  color: #606266;
+  color: var(--gs-text-2);
   line-height: 1.8;
 }
 .ai-best-for {
   font-size: 14px;
-  color: #409eff;
+  color: var(--gs-primary);
   padding: 8px 16px;
   background: #ecf5ff;
   border-radius: 8px;
@@ -1363,14 +1365,14 @@ async function handleFavorite() {
 .review-section {
   margin-top: 30px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   padding: 30px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
 .section-title {
   font-size: 20px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
   margin-bottom: 20px;
 }
 .review-list {
@@ -1391,7 +1393,7 @@ async function handleFavorite() {
 }
 .review-user {
   font-weight: 500;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 .review-time {
   margin-left: auto;
@@ -1400,7 +1402,7 @@ async function handleFavorite() {
 }
 .review-content {
   font-size: 14px;
-  color: #606266;
+  color: var(--gs-text-2);
   line-height: 1.6;
 }
 
@@ -1408,7 +1410,7 @@ async function handleFavorite() {
 .recommend-section {
   margin-top: 30px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   padding: 24px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
 }
@@ -1431,7 +1433,7 @@ async function handleFavorite() {
 .recommend-image {
   width: 100%;
   height: 160px;
-  background: #f5f5f5;
+  background: var(--gs-bg-hover);
 }
 .recommend-info {
   padding: 10px 12px 14px;
@@ -1439,7 +1441,7 @@ async function handleFavorite() {
 .recommend-name {
   font-size: 14px;
   font-weight: 500;
-  color: #303133;
+  color: var(--gs-text-1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1448,11 +1450,11 @@ async function handleFavorite() {
 .recommend-price {
   font-size: 16px;
   font-weight: 700;
-  color: #f56c6c;
+  color: var(--gs-price);
   margin-bottom: 6px;
 }
 .recommend-shop {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 </style>

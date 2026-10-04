@@ -1,0 +1,60 @@
+/* 全局基础样式：Reset / 字体 / 底色 / 选区 / 滚动条 / 页面切换动画
+   （原 App.vue 内的全局样式已并入此处，避免双处维护覆盖） */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+  background: var(--gs-bg-page);
+  color: var(--gs-text-1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--gs-primary) 18%, #fff);
+}
+
+/* 价格数字统一等宽渲染，列表/详情对齐更稳 */
+.product-price, .ph-stats strong, .pr-group-price {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 页面切换动画（DefaultLayout 的 <transition name="page">） */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-leave-to {
+  opacity: 0;
+}
+
+/* 统一细滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c9cdd4;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a9aeb8;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}

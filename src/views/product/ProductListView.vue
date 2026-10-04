@@ -88,11 +88,22 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.product-list-page { background: #f5f7fa; min-height: 100%; padding: 30px 0 60px; }
-.page-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-.page-title { font-size: 24px; font-weight: 600; color: #303133; margin-bottom: 16px; }
-.filter-bar { display: flex; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px; }
+.product-list-page { background: var(--gs-bg-page); min-height: 100%; padding: 24px 0 60px; }
+.page-container { max-width: var(--gs-container); margin: 0 auto; padding: 0 20px; }
+.page-title { font-size: 22px; font-weight: 700; color: var(--gs-text-1); margin-bottom: 16px; }
+/* 筛选栏卡片化：白底 + 圆角 + 轻阴影 */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: var(--gs-bg-card);
+  border-radius: var(--gs-radius-lg);
+  padding: 16px 18px;
+  box-shadow: var(--gs-shadow-1);
+}
 .product-grid { min-height: 300px; }
 .product-col { margin-bottom: 20px; }
-.pagination-wrap { text-align: center; margin-top: 24px; }
+.pagination-wrap { text-align: center; margin-top: 28px; }
 </style>

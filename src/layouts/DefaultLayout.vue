@@ -2,7 +2,11 @@
   <div class="default-layout">
     <AppHeader />
     <main class="main-content">
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <transition name="page" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </main>
     <AppFooter />
   </div>
@@ -21,9 +25,10 @@ import AppFooter from '@/components/AppFooter.vue'
 }
 .main-content {
   flex: 1;
-  max-width: 1200px;
+  max-width: var(--gs-container);
   width: 100%;
   margin: 0 auto;
-  padding: 20px;
+  padding: 24px 20px 56px;
+  box-sizing: border-box;
 }
 </style>
