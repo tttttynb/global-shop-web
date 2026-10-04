@@ -2,8 +2,12 @@
   <div class="flash-sale-card" v-if="sale">
     <div class="fs-header">
       <span class="fs-badge">⚡ 限时秒杀</span>
-      <span class="fs-countdown" :class="{ urgent: remainSeconds <= 30 }">
-        {{ countdownText }}
+      <span class="fs-header-right">
+        <span class="fs-countdown" :class="{ urgent: remainSeconds <= 30 }">
+          {{ countdownText }}
+        </span>
+        <!-- 闭环原则：弹出的卡片必须可关闭 -->
+        <el-icon class="fs-close" :size="16" @click.stop="$emit('close')"><Close /></el-icon>
       </span>
     </div>
 
@@ -59,7 +63,7 @@ const props = defineProps({
   sale: { type: Object, default: null },
   buying: { type: Boolean, default: false }
 })
-defineEmits(['buy'])
+defineEmits(['buy', 'close'])
 
 // dayjs 解析后端时间，规避 Safari 对 "YYYY-MM-DD HH:mm:ss" 的解析问题；
 // sale 变化（新活动/进度广播）时由组合式函数自动重启计时
@@ -94,6 +98,19 @@ const countdownText = computed(() => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
+}
+.fs-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fs-close {
+  cursor: pointer;
+  color: #c0c4cc;
+  transition: color 0.2s;
+}
+.fs-close:hover {
+  color: var(--gs-text-1);
 }
 .fs-badge {
   background: linear-gradient(90deg, #ff4d4f, #ff7a45);

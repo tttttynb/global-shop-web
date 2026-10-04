@@ -370,7 +370,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
@@ -869,7 +869,18 @@ async function handleAddCart() {
   try {
     await addToCart({ productId: product.value.id, skuId: selectedSku.value?.id ?? null, quantity: quantity.value })
     cartStore.increment()
-    ElMessage.success(t('messages.addedToCart'))
+    // 闭环：成功反馈自带"去购物车"出口，点击消息直接跳转结算
+    ElMessage({
+      message: h('span', { class: 'cart-feedback' }, [
+        t('messages.addedToCart'),
+        h('span', {
+          class: 'cart-feedback-link',
+          onClick: () => { router.push('/cart') }
+        }, t('cart.goCart') + ' ›')
+      ]),
+      type: 'success',
+      duration: 3000
+    })
   } catch {
     ElMessage.error(t('messages.addCartFailed'))
   } finally {

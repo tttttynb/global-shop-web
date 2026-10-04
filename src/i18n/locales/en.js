@@ -88,6 +88,7 @@ export default {
     totalLabel: 'Total: ',
     checkout: 'Checkout',
     empty: 'Your cart is empty',
+    goCart: 'Go to Cart',
     goShopping: 'Start Shopping',
     taxHint: 'Intl. shipping & cross-border tax calculated at checkout',
     usePoints: 'Redeem points ({points} available)',

@@ -1,18 +1,50 @@
 <template>
   <div class="home-page">
-    <!-- Banner轮播 -->
-    <el-carousel :interval="4000" height="360px" class="banner-carousel">
-      <el-carousel-item v-for="banner in banners" :key="banner.title">
-        <div class="banner-item" :style="{ background: banner.bg }">
-          <div class="banner-content">
-            <h2>{{ banner.title }}</h2>
-            <p>{{ banner.desc }}</p>
+    <!-- Banner 区：主轮播 + 右侧功能入口（打破单条横幅的单调感） -->
+    <div class="banner-row">
+      <el-carousel :interval="4000" height="360px" class="banner-carousel">
+        <el-carousel-item v-for="banner in banners" :key="banner.title">
+          <div class="banner-item" :style="{ background: banner.bg }">
+            <div class="banner-content">
+              <h2>{{ banner.title }}</h2>
+              <p>{{ banner.desc }}</p>
+            </div>
           </div>
-        </div>
-      </el-carousel-item>
-    </el-carousel>
+        </el-carousel-item>
+      </el-carousel>
+
+      <div class="banner-side">
+        <router-link to="/ai/search?mode=image" class="side-entry side-ai">
+          <el-icon :size="30"><MagicStick /></el-icon>
+          <div class="side-text">
+            <h4>AI 以图搜图</h4>
+            <p>看到街拍 · 找同款</p>
+          </div>
+        </router-link>
+        <router-link to="/live" class="side-entry side-live">
+          <el-icon :size="30"><VideoCamera /></el-icon>
+          <div class="side-text">
+            <h4>跨境直播</h4>
+            <p>边看边买 · 实时翻译</p>
+          </div>
+        </router-link>
+      </div>
+    </div>
 
     <div class="home-container">
+      <!-- 类目快捷入口（点击进入对应关键词搜索，形成逛的闭环） -->
+      <div class="cat-row" v-if="categories.length">
+        <div
+          class="cat-item"
+          v-for="(c, i) in categories.slice(0, 8)"
+          :key="c.id"
+          @click="$router.push({ path: '/products', query: { categoryId: c.id } })"
+        >
+          <span class="cat-icon" :style="catStyle(i)">{{ c.icon || c.name.charAt(0) }}</span>
+          <span class="cat-name">{{ c.name }}</span>
+        </div>
+      </div>
+
       <!-- 正在直播 -->
       <section class="section" v-if="liveList.length > 0">
         <div class="section-header">
@@ -64,7 +96,12 @@
       </template>
 
       <template v-else>
-        <section class="section" v-for="section in feedSections" :key="section.key">
+        <section
+          class="section"
+          v-for="(section, si) in feedSections"
+          :key="section.key"
+          :style="{ '--sec-accent': sectionAccents[(si + 1) % sectionAccents.length] }"
+        >
           <div class="section-header">
             <div class="section-title-row">
               <h2 class="section-title">{{ section.title }}</h2>
@@ -101,7 +138,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getHomeFeed } from '@/api/product'
+import { getHomeFeed, getCategoryList } from '@/api/product'
 import { getLiveList } from '@/api/live'
 
 const banners = [
@@ -114,11 +151,29 @@ const banners = [
 const liveList = ref([])
 const feedSections = ref([])
 const feedLoading = ref(true)
+const categories = ref([])
+
+// 分区跳色：让各楼层标题条/链接色轮换，打破全蓝的单调节奏
+const sectionAccents = ['#165dff', '#ee0a24', '#ff8f1f', '#00b578']
+function catStyle(i) {
+  const c = sectionAccents[i % sectionAccents.length]
+  return { background: `color-mix(in srgb, ${c} 12%, #fff)`, color: c }
+}
 
 onMounted(() => {
   loadLiveList()
   loadFeed()
+  loadCategories()
 })
+
+async function loadCategories() {
+  try {
+    const res = await getCategoryList()
+    categories.value = res.data || []
+  } catch {
+    categories.value = []
+  }
+}
 
 async function loadLiveList() {
   try {
@@ -150,12 +205,100 @@ async function loadFeed() {
   background: var(--gs-bg-page);
   min-height: 100%;
 }
-.banner-carousel {
+/* Banner 行：主轮播 + 右侧功能入口 */
+.banner-row {
   max-width: var(--gs-container);
   margin: 0 auto;
+  padding: 0 0;
+  display: flex;
+  gap: 16px;
+}
+.banner-carousel {
+  flex: 1;
+  min-width: 0;
   border-radius: var(--gs-radius-lg);
   overflow: hidden;
   box-shadow: var(--gs-shadow-1);
+}
+.banner-side {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.side-entry {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 22px;
+  border-radius: var(--gs-radius-lg);
+  color: #fff;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  overflow: hidden;
+}
+.side-entry:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--gs-shadow-2);
+}
+.side-text h4 {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.side-text p {
+  font-size: 12px;
+  opacity: 0.85;
+}
+.side-ai {
+  background: linear-gradient(135deg, #165dff 0%, #6f3bff 100%);
+}
+.side-live {
+  background: linear-gradient(135deg, #ee0a24 0%, #ff7a45 100%);
+}
+
+/* 类目快捷入口 */
+.cat-row {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 36px;
+  background: var(--gs-bg-card);
+  border-radius: var(--gs-radius-lg);
+  padding: 18px 22px;
+  box-shadow: var(--gs-shadow-1);
+}
+.cat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+}
+.cat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  transition: transform 0.2s ease;
+}
+.cat-item:hover .cat-icon {
+  transform: translateY(-3px) scale(1.05);
+}
+.cat-name {
+  font-size: 13px;
+  color: var(--gs-text-2);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .banner-item {
   height: 100%;
@@ -200,13 +343,13 @@ async function loadFeed() {
   font-weight: 700;
   color: var(--gs-text-1);
 }
-/* 标题主色竖条 */
+/* 标题竖条：随分区跳色（默认主色） */
 .section-title::before {
   content: '';
   width: 4px;
   height: 18px;
   border-radius: 2px;
-  background: var(--gs-primary);
+  background: var(--sec-accent, var(--gs-primary));
   margin-right: 10px;
 }
 .section-more {

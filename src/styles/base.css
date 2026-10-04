@@ -21,6 +21,24 @@ a {
   color: inherit;
 }
 
+/* 空状态行动区：全站空状态统一给"下一步"出口（闭环原则） */
+.empty-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* 加购成功反馈里的"去购物车"链接（ElMessage 挂在 body 下，需全局样式） */
+.cart-feedback-link {
+  color: var(--gs-primary);
+  font-weight: 600;
+  margin-left: 8px;
+  cursor: pointer;
+}
+.cart-feedback-link:hover {
+  text-decoration: underline;
+}
+
 ::selection {
   background: color-mix(in srgb, var(--gs-primary) 18%, #fff);
 }

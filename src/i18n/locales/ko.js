@@ -88,6 +88,7 @@ export default {
     totalLabel: '합계: ',
     checkout: '결제하기',
     empty: '장바구니가 비어 있습니다',
+    goCart: '장바구니로',
     goShopping: '쇼핑하러 가기',
     taxHint: '국제 배송비와 해외직구 세금은 주문 시 자동 계산됩니다',
     usePoints: '포인트 사용 (사용 가능 {points}점)',

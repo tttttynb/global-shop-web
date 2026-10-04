@@ -43,9 +43,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { getProductListPaged, getCategoryList } from '@/api/product'
 import ProductCard from '@/components/ProductCard.vue'
 
+const route = useRoute()
 const productList = ref([])
 const loading = ref(true)
 const categories = ref([])
@@ -54,6 +56,10 @@ const sortBy = ref('latest')
 const currentPage = ref(1)
 const pageSize = ref(12)
 const total = ref(0)
+
+// 支持外部入口（如首页类目贴片）带 categoryId 直达已筛选的列表
+const queryCategoryId = Number(route.query.categoryId)
+if (queryCategoryId) selectedCategory.value = queryCategoryId
 
 async function loadCategories() {
   try {

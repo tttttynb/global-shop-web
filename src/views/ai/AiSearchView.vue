@@ -113,8 +113,13 @@
         </el-row>
       </template>
 
-      <!-- 搜索后无结果 -->
-      <el-empty v-else :description="mode === 'image' ? '没有找到相似商品，换一张主体更清晰的图试试？' : '没有找到相关商品，换个描述试试？'" />
+      <!-- 搜索后无结果：给下一步出口，不做成死胡同 -->
+      <el-empty v-else :description="mode === 'image' ? '没有找到相似商品，换一张主体更清晰的图试试？' : '没有找到相关商品，换个描述试试？'">
+        <div class="empty-actions">
+          <el-button type="primary" @click="$router.push('/ai/chat')">让 AI 导购帮你找</el-button>
+          <el-button @click="$router.push('/products')">浏览全部商品</el-button>
+        </div>
+      </el-empty>
     </div>
   </div>
 </template>

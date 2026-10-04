@@ -88,6 +88,7 @@ export default {
     totalLabel: '合计：',
     checkout: '去结算',
     empty: '购物车是空的',
+    goCart: '去购物车',
     goShopping: '去逛逛',
     taxHint: '国际运费与跨境税费将在下单时自动计算',
     usePoints: '积分抵扣（可用 {points} 分）',

@@ -56,7 +56,12 @@
       </el-card>
     </template>
 
-    <el-empty v-else description="暂无相关订单" />
+    <el-empty v-else description="暂无相关订单">
+      <div class="empty-actions">
+        <el-button type="primary" @click="$router.push('/products')">去逛逛好物</el-button>
+        <el-button @click="$router.push('/live')">去看看直播</el-button>
+      </div>
+    </el-empty>
   </div>
 </template>
 

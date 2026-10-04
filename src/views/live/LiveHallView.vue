@@ -10,7 +10,12 @@
     </el-tabs>
 
     <div v-loading="loading" class="hall-content">
-      <el-empty v-if="!loading && liveList.length === 0" description="暂无直播" />
+      <el-empty v-if="!loading && liveList.length === 0" description="暂无直播">
+        <div class="empty-actions">
+          <el-button type="primary" @click="$router.push('/products')">先去逛逛好物</el-button>
+          <el-button @click="$router.push('/group-buy')">看看拼团专区</el-button>
+        </div>
+      </el-empty>
 
       <el-row :gutter="20" v-else>
         <el-col :span="6" v-for="room in liveList" :key="room.id" class="room-col">

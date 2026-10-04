@@ -22,7 +22,12 @@
           </div>
         </el-card>
       </template>
-      <el-empty v-if="!loading && filtered.length === 0" description="暂无优惠券" />
+      <el-empty v-if="!loading && filtered.length === 0" description="暂无优惠券">
+        <div class="empty-actions">
+          <el-button type="primary" @click="$router.push('/products')">去下单赚优惠券</el-button>
+          <el-button @click="$router.push('/points')">积分商城兑换</el-button>
+        </div>
+      </el-empty>
     </div>
   </div>
 </template>

@@ -9,6 +9,8 @@
       </router-view>
     </main>
     <AppFooter />
+    <!-- 长页面回到顶部 -->
+    <el-backtop :right="28" :bottom="28" />
   </div>
 </template>
 

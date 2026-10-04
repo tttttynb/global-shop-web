@@ -24,9 +24,9 @@
               <p>{{ liveRoom.status === 0 ? '直播尚未开始' : '直播已结束' }}</p>
             </div>
           </template>
-          <!-- 🆕 闪购秒杀卡片：视频区左下角悬浮（Phase 2 - F3） -->
+          <!-- 🆕 闪购秒杀卡片：视频区左下角悬浮（Phase 2 - F3）；可手动关闭，开播新场次/进度广播会再次弹出 -->
           <div class="flash-sale-overlay" v-if="flashSale">
-            <FlashSaleCard :sale="flashSale" :buying="fsBuying" @buy="handleFlashBuy" />
+            <FlashSaleCard :sale="flashSale" :buying="fsBuying" @buy="handleFlashBuy" @close="flashSale = null" />
           </div>
         </div>
         <div class="video-info">

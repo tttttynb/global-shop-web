@@ -88,6 +88,7 @@ export default {
     totalLabel: '合計：',
     checkout: '購入手続きへ',
     empty: 'カートは空です',
+    goCart: 'カートへ',
     goShopping: 'ショッピングに行く',
     taxHint: '国際送料と越境税は注文時に自動計算されます',
     usePoints: 'ポイント利用（{points} ポイント利用可能）',

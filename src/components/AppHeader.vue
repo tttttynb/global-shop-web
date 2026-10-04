@@ -1,4 +1,6 @@
 <template>
+  <!-- 公告条：随页面滚走，不占吸顶空间 -->
+  <div class="announce-bar">✈️ 跨境直邮 · 满 ¥199 包邮 · 全球好物 AI 帮你选</div>
   <header class="app-header">
     <div class="header-inner">
       <router-link to="/" class="logo">
@@ -335,6 +337,15 @@ function handleLogout() {
 </script>
 
 <style scoped>
+/* 公告条：渐变暖色，随滚动离场 */
+.announce-bar {
+  background: linear-gradient(90deg, #ee0a24 0%, #ff7a45 100%);
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-align: center;
+  padding: 6px 0;
+}
 .app-header {
   background: var(--gs-bg-card);
   box-shadow: 0 1px 0 var(--gs-border), 0 2px 12px rgba(15, 24, 44, 0.04);
