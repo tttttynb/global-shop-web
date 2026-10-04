@@ -1,10 +1,9 @@
 <template>
   <div class="merchant-coupons">
-    <h2 class="page-title">优惠券管理</h2>
-
-    <el-card class="action-card">
+    <div class="page-header">
+      <h2 class="page-title">优惠券管理</h2>
       <el-button type="primary" @click="showCreateDialog = true">创建优惠券</el-button>
-    </el-card>
+    </div>
 
     <el-card class="table-card">
       <el-table v-loading="loading" :data="couponList" stripe>
@@ -30,7 +29,11 @@
         <el-table-column prop="startTime" label="开始时间" width="160" />
         <el-table-column prop="endTime" label="结束时间" width="160" />
         <template #empty>
-          <el-empty description="暂无优惠券" />
+          <el-empty description="还没有优惠券，创建一张帮助商品转化">
+            <div class="empty-actions">
+              <el-button type="primary" @click="showCreateDialog = true">创建优惠券</el-button>
+            </div>
+          </el-empty>
         </template>
       </el-table>
     </el-card>
@@ -49,11 +52,11 @@
         </el-form-item>
         <el-form-item label="面额/折扣">
           <el-input-number v-model="form.discountValue" :min="0" :precision="2" />
-          <span style="margin-left:8px;color:#999">{{ form.type === 1 ? '元' : '折 (如8.5表示85折)' }}</span>
+          <span style="margin-left:8px;color:var(--gs-text-3)">{{ form.type === 1 ? '元' : '折 (如8.5表示85折)' }}</span>
         </el-form-item>
         <el-form-item label="使用门槛">
           <el-input-number v-model="form.minAmount" :min="0" :precision="2" />
-          <span style="margin-left:8px;color:#999">元 (0表示无门槛)</span>
+          <span style="margin-left:8px;color:var(--gs-text-3)">元 (0表示无门槛)</span>
         </el-form-item>
         <el-form-item label="发放数量">
           <el-input-number v-model="form.stock" :min="1" />
@@ -133,7 +136,7 @@ onMounted(fetchCoupons)
 
 <style scoped>
 .merchant-coupons { max-width: 960px; }
-.page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #303133; }
-.action-card { margin-bottom: 16px; border-radius: 8px; }
-.table-card { border-radius: 8px; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.page-title { font-size: 20px; font-weight: 600; margin: 0; color: var(--gs-text-1); }
+.table-card { border-radius: var(--gs-radius-lg); }
 </style>

@@ -16,7 +16,7 @@
         <el-table-column prop="name" label="商品名称" min-width="180" />
         <el-table-column prop="price" label="价格" width="120" align="center">
           <template #default="{ row }">
-            <span style="color: #f56c6c; font-weight: 600;">¥{{ row.price?.toFixed(2) }}</span>
+            <span style="color: var(--gs-price); font-weight: 600;">¥{{ row.price?.toFixed(2) }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="stock" label="库存" width="80" align="center" />
@@ -39,7 +39,11 @@
           </template>
         </el-table-column>
         <template #empty>
-          <el-empty description="暂无商品" />
+          <el-empty description="还没有商品，发布第一批好物开始经营吧">
+            <div class="empty-actions">
+              <el-button type="primary" @click="$router.push('/merchant/product/publish')">发布商品</el-button>
+            </div>
+          </el-empty>
         </template>
       </el-table>
     </el-card>
@@ -220,6 +224,6 @@ onMounted(fetchProducts)
 <style scoped>
 .merchant-products { max-width: 960px; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.page-title { font-size: 20px; font-weight: 600; color: #303133; margin: 0; }
+.page-title { font-size: 20px; font-weight: 600; color: var(--gs-text-1); margin: 0; }
 .table-card { border-radius: 8px; }
 </style>

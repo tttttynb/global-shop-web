@@ -6,7 +6,7 @@
         <el-table-column prop="id" label="退款单号" width="80" />
         <el-table-column prop="orderId" label="订单号" width="80" />
         <el-table-column label="退款金额" width="120" align="center">
-          <template #default="{ row }"><span style="color: #f56c6c; font-weight: 600;">¥{{ row.refundAmount?.toFixed(2) }}</span></template>
+          <template #default="{ row }"><span style="color: var(--gs-price); font-weight: 600;">¥{{ row.refundAmount?.toFixed(2) }}</span></template>
         </el-table-column>
         <el-table-column prop="reason" label="退款原因" min-width="150" />
         <el-table-column label="状态" width="100" align="center">
@@ -60,6 +60,6 @@ onMounted(loadList)
 
 <style scoped>
 .merchant-refunds { max-width: 960px; }
-.page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #303133; }
+.page-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: var(--gs-text-1); }
 .table-card { border-radius: 8px; }
 </style>

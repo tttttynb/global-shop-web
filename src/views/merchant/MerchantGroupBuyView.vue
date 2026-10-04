@@ -214,12 +214,12 @@ onMounted(loadAll)
 .page-head h2 {
   font-size: 20px;
   font-weight: 700;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 
 .page-tip {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin-bottom: 16px;
 }
 
@@ -242,7 +242,7 @@ onMounted(loadAll)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f7fa;
+  background: var(--gs-bg-hover);
 }
 
 .p-info {
@@ -252,7 +252,7 @@ onMounted(loadAll)
 .p-name {
   font-size: 13px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -261,7 +261,7 @@ onMounted(loadAll)
 
 .p-sub {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 
 .group-price {
@@ -271,12 +271,12 @@ onMounted(loadAll)
 
 .time-cell {
   font-size: 12px;
-  color: #606266;
+  color: var(--gs-text-2);
 }
 
 .form-tip {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin-top: 4px;
 }
 </style>

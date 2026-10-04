@@ -82,16 +82,35 @@ onMounted(async () => {
 }
 .merchant-sidebar {
   width: 220px;
-  background: #fff;
-  border-right: 1px solid #e6e6e6;
-  min-height: calc(100vh - 60px);
+  background: var(--gs-bg-card);
+  border-right: 1px solid var(--gs-border);
+  min-height: calc(100vh - var(--gs-header-height));
+  padding-top: 12px;
+  box-sizing: border-box;
 }
 .merchant-sidebar .el-menu {
   border-right: none;
 }
+/* 菜单项圆角块状选中态 */
+.merchant-sidebar :deep(.el-menu-item) {
+  height: 46px;
+  margin: 4px 10px;
+  border-radius: var(--gs-radius-sm);
+  color: var(--gs-text-2);
+}
+.merchant-sidebar :deep(.el-menu-item:hover) {
+  background: var(--gs-bg-hover);
+}
+.merchant-sidebar :deep(.el-menu-item.is-active) {
+  background: color-mix(in srgb, var(--gs-primary) 9%, #fff);
+  color: var(--gs-primary);
+  font-weight: 600;
+}
 .merchant-content {
   flex: 1;
-  padding: 24px;
-  background: #f5f5f5;
+  min-width: 0;
+  padding: 24px 28px 48px;
+  background: var(--gs-bg-page);
+  box-sizing: border-box;
 }
 </style>

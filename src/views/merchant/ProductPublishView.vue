@@ -330,7 +330,7 @@ const handleSubmit = async () => {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 20px;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 .ai-card {
   margin-bottom: 20px;
@@ -341,7 +341,7 @@ const handleSubmit = async () => {
   align-items: center;
   gap: 6px;
   font-weight: 600;
-  color: #67c23a;
+  color: var(--gs-success);
 }
 .ai-tags {
   padding-top: 8px;
@@ -351,7 +351,7 @@ const handleSubmit = async () => {
 }
 .ai-tags-label {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin-right: 8px;
 }
 .form-card {
@@ -368,24 +368,24 @@ const handleSubmit = async () => {
 .sku-summary {
   margin-top: 8px;
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 /* 🆕 跨境定价（Phase 3 - F5） */
 .forex-hint {
   margin: -8px 0 16px 100px;
   font-size: 12px;
-  color: #e6a23c;
+  color: var(--gs-warning);
   line-height: 1.6;
 }
 .forex-convert-hint {
   margin-left: 12px;
   font-size: 13px;
-  color: #67c23a;
+  color: var(--gs-success);
   font-weight: 600;
 }
 .price-auto-hint {
   margin-left: 12px;
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 </style>

@@ -59,7 +59,7 @@ const handleSubmit = async () => {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 20px;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 .apply-card {
   border-radius: 8px;

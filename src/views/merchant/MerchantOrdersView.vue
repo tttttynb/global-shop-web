@@ -30,13 +30,13 @@
         <el-table-column prop="createTime" label="下单时间" min-width="170" />
         <el-table-column label="订单金额" width="120" align="center">
           <template #default="{ row }">
-            <span style="color: #f56c6c; font-weight: 600;">¥{{ row.totalAmount?.toFixed(2) }}</span>
+            <span style="color: var(--gs-price); font-weight: 600;">¥{{ row.totalAmount?.toFixed(2) }}</span>
           </template>
         </el-table-column>
         <el-table-column label="物流" width="160" align="center">
           <template #default="{ row }">
             <span v-if="row.carrierName" style="font-size:13px;">{{ row.carrierName }}<br/>{{ row.trackingNumber }}</span>
-            <span v-else style="color:#909399;">-</span>
+            <span v-else style="color:var(--gs-text-3);">-</span>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="100" align="center">
@@ -55,7 +55,12 @@
           </template>
         </el-table-column>
         <template #empty>
-          <el-empty description="暂无订单" />
+          <el-empty description="暂无订单，先把商品推广出去吧">
+            <div class="empty-actions">
+              <el-button type="primary" @click="$router.push('/merchant/product/publish')">发布商品引流</el-button>
+              <el-button @click="$router.push('/merchant/live/create')">开播带货</el-button>
+            </div>
+          </el-empty>
         </template>
       </el-table>
     </el-card>
@@ -179,7 +184,7 @@ onMounted(fetchOrders)
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 20px;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 .table-card {
   border-radius: 8px;
