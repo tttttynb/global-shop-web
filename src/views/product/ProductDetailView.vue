@@ -2,10 +2,23 @@
   <div class="product-detail-page">
     <div class="page-container" v-loading="loading">
       <template v-if="product">
+        <!-- 面包屑（京东式）：首页 / 类目 / 商品 -->
+        <el-breadcrumb class="detail-breadcrumb" separator="/">
+          <el-breadcrumb-item :to="{ path: '/' }">{{ $t('header.home') }}</el-breadcrumb-item>
+          <el-breadcrumb-item v-if="categoryName" :to="{ path: '/products', query: { categoryId: product.categoryId } }">{{ categoryName }}</el-breadcrumb-item>
+          <el-breadcrumb-item>{{ product.name }}</el-breadcrumb-item>
+        </el-breadcrumb>
+
         <div class="detail-main">
-          <!-- 左侧图片 -->
-          <div class="detail-image">
-            <el-image :src="displayImage" fit="contain" class="main-image">
+          <!-- 左侧图片（淘宝式放大镜：hover 跟随缩放） -->
+          <div
+            class="detail-image"
+            :class="{ zooming: zoomOn }"
+            @mousemove="onImgMove"
+            @mouseenter="zoomOn = true"
+            @mouseleave="zoomOn = false"
+          >
+            <el-image :src="displayImage" fit="contain" class="main-image" :style="zoomStyle">
               <template #error>
                 <div class="image-placeholder">
                   <el-icon :size="64"><Picture /></el-icon>
@@ -165,6 +178,14 @@
               <el-button type="danger" size="large" @click="handleBuyNow" :loading="buyLoading">
                 {{ $t('product.buyNow') }}
               </el-button>
+            </div>
+
+            <!-- 服务承诺（京东式信任行） -->
+            <div class="service-badges">
+              <span>✈️ 跨境直邮</span>
+              <span>🚚 满¥199包邮</span>
+              <span>↩️ 7天无理由退换</span>
+              <span>✅ 正品保障</span>
             </div>
 
             <!-- 🧾 预估到手价（Phase 3 - F6：商品价 + 国际运费 + 跨境综合税） -->
@@ -374,7 +395,7 @@ import { ref, computed, watch, onMounted, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { getProductDetail, getProductReviews, toggleFavorite, getAiReviewSummary, getProductStats, getSimilarProducts, getFrequentlyBought, getProductSkus, getPriceHistory, getReviewIntelligence } from '@/api/product'
+import { getProductDetail, getProductReviews, toggleFavorite, getAiReviewSummary, getProductStats, getSimilarProducts, getFrequentlyBought, getProductSkus, getPriceHistory, getReviewIntelligence, getCategoryList } from '@/api/product'
 import { getTaxEstimate } from '@/api/tax'
 import { addToCart } from '@/api/cart'
 import { createOrder } from '@/api/order'
@@ -390,6 +411,34 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const cartStore = useCartStore()
+
+// ==================== 图片放大镜（淘宝式 hover 跟随缩放） ====================
+const zoomOn = ref(false)
+const zoomOrigin = ref({ x: 50, y: 50 })
+const zoomStyle = computed(() => zoomOn.value
+  ? { transform: 'scale(1.8)', transformOrigin: `${zoomOrigin.value.x}% ${zoomOrigin.value.y}%` }
+  : {})
+function onImgMove(e) {
+  const r = e.currentTarget.getBoundingClientRect()
+  zoomOrigin.value = {
+    x: Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100)),
+    y: Math.min(100, Math.max(0, ((e.clientY - r.top) / r.height) * 100))
+  }
+}
+
+// ==================== 面包屑：类目名 ====================
+const categoryName = computed(() => {
+  if (!product.value?.categoryId) return ''
+  const cat = categories.value.find(c => c.id === product.value.categoryId)
+  return cat?.name || ''
+})
+const categories = ref([])
+async function loadCategories() {
+  try {
+    const res = await getCategoryList()
+    categories.value = res.data || []
+  } catch {}
+}
 const userStore = useUserStore()
 const localeStore = useLocaleStore()
 
@@ -463,6 +512,8 @@ onMounted(() => {
   loadSimilar(id)
   loadFrequentlyBought(id)
   loadAlertStatus(id)
+  // 面包屑类目名
+  loadCategories()
   // Phase 4：拼团入口 / 口碑档案 / 积分抵扣
   loadGroupEntry(id)
   loadReputation(id)
@@ -966,6 +1017,28 @@ async function handleFavorite() {
 .detail-info {
   flex: 1;
   min-width: 0;
+}
+/* 面包屑 */
+.detail-breadcrumb {
+  margin-bottom: 16px;
+}
+/* 图片放大镜 */
+.detail-image {
+  cursor: zoom-in;
+  overflow: hidden;
+}
+.detail-image .main-image {
+  transition: transform 0.12s ease-out;
+  will-change: transform;
+}
+/* 服务承诺行（京东式信任行） */
+.service-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--gs-text-3);
 }
 .product-name {
   font-size: 22px;

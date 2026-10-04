@@ -37,6 +37,16 @@
         </div>
       </el-card>
 
+      <!-- 🚚 凑单免运费进度（淘宝/京东式闭环提示，规则：满¥199包邮） -->
+      <div class="free-ship-progress" v-if="totalAmount < 199">
+        <span class="fsp-text">🚚 再买 <b>{{ localeStore.formatPrice(199 - totalAmount) }}</b> 免国际运费</span>
+        <el-progress class="fsp-bar" :percentage="Math.min(100, Math.round((totalAmount / 199) * 100))" :stroke-width="8" :show-text="false" />
+        <span class="fsp-threshold">满¥199包邮</span>
+      </div>
+      <div class="free-ship-progress done" v-else>
+        <span class="fsp-text">🎉 已满 ¥199，本单免国际运费</span>
+      </div>
+
       <div class="checkout-bar">
         <!-- 🆕 运费/税费提示（Phase 3 - F6：结算时自动计入） -->
         <div class="bar-tax-hint">{{ $t('cart.taxHint') }}</div>
@@ -309,6 +319,34 @@ onMounted(() => {
   color: #e6323e;
   min-width: 90px;
   text-align: right;
+}
+
+/* 凑单免运费进度 */
+.free-ship-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: color-mix(in srgb, var(--gs-warning) 8%, #fff);
+  border: 1px dashed color-mix(in srgb, var(--gs-warning) 40%, #fff);
+  border-radius: var(--gs-radius);
+  padding: 10px 16px;
+  margin-bottom: 12px;
+}
+.free-ship-progress.done {
+  background: color-mix(in srgb, var(--gs-success) 8%, #fff);
+  border-color: color-mix(in srgb, var(--gs-success) 35%, #fff);
+}
+.fsp-text {
+  font-size: 13px;
+  color: var(--gs-text-2);
+  white-space: nowrap;
+}
+.fsp-text b { color: var(--gs-price); }
+.fsp-bar { flex: 1; }
+.fsp-threshold {
+  font-size: 12px;
+  color: var(--gs-text-3);
+  white-space: nowrap;
 }
 
 .checkout-bar {

@@ -15,7 +15,9 @@
       <div class="product-bottom">
         <!-- 金额随展示币种换算（Phase 3 - F5 参考价） -->
         <span class="product-price">{{ localeStore.formatPrice(product.price) }}</span>
-        <span class="product-shop" v-if="product.shopName">{{ product.shopName }}</span>
+        <!-- 1688 式社会证明：已售件数 -->
+        <span class="product-sales" v-if="product.salesCount > 0">已售 {{ formatSales(product.salesCount) }}</span>
+        <span class="product-shop" v-else-if="product.shopName">{{ product.shopName }}</span>
       </div>
     </div>
   </el-card>
@@ -34,6 +36,13 @@ const localeStore = useLocaleStore()
 
 function goDetail() {
   router.push(`/product/${props.product.id}`)
+}
+
+/** 销量格式化：1000+ / 1万+（1688 式） */
+function formatSales(n) {
+  if (n >= 10000) return (n / 10000).toFixed(1).replace(/\.0$/, '') + '万+'
+  if (n >= 1000) return Math.floor(n / 1000) + '000+'
+  return n
 }
 </script>
 
@@ -114,5 +123,9 @@ function goDetail() {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.product-sales {
+  font-size: 12px;
+  color: var(--gs-text-3);
 }
 </style>
