@@ -41,7 +41,11 @@
             </div>
           </div>
         </div>
-        <el-empty v-else :description="$t('groupbuy.noActivities')" />
+        <el-empty v-else :description="$t('groupbuy.noActivities')">
+          <div class="empty-actions">
+            <el-button type="primary" @click="$router.push('/products')">先去挑选心仪商品</el-button>
+          </div>
+        </el-empty>
       </el-tab-pane>
 
       <!-- ==================== 我的拼团 ==================== -->
@@ -264,13 +268,13 @@ onBeforeUnmount(stopCountdown)
 .page-title {
   font-size: 24px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--gs-text-1);
   margin-bottom: 4px;
 }
 
 .zone-subtitle {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin-bottom: 16px;
 }
 
@@ -287,7 +291,7 @@ onBeforeUnmount(stopCountdown)
 
 .activity-card {
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transition: transform 0.2s, box-shadow 0.2s;
@@ -316,8 +320,8 @@ onBeforeUnmount(stopCountdown)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f7fa;
-  color: #c0c4cc;
+  background: var(--gs-bg-hover);
+  color: var(--gs-text-3);
 }
 
 .ac-discount {
@@ -339,7 +343,7 @@ onBeforeUnmount(stopCountdown)
 .ac-name {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -347,12 +351,12 @@ onBeforeUnmount(stopCountdown)
 }
 
 .ac-name:hover {
-  color: #ee0a24;
+  color: var(--gs-price);
 }
 
 .ac-shop {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin: 4px 0 8px;
 }
 
@@ -366,12 +370,12 @@ onBeforeUnmount(stopCountdown)
 .ac-group-price {
   font-size: 20px;
   font-weight: 700;
-  color: #ee0a24;
+  color: var(--gs-price);
 }
 
 .ac-origin-price {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
   text-decoration: line-through;
 }
 
@@ -384,7 +388,7 @@ onBeforeUnmount(stopCountdown)
 
 .ac-sold {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 
 .ac-actions {
@@ -404,7 +408,7 @@ onBeforeUnmount(stopCountdown)
   align-items: center;
   gap: 16px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   padding: 14px 16px;
   cursor: pointer;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
@@ -429,7 +433,7 @@ onBeforeUnmount(stopCountdown)
 .mg-name {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -437,17 +441,17 @@ onBeforeUnmount(stopCountdown)
 
 .mg-meta {
   font-size: 13px;
-  color: #606266;
+  color: var(--gs-text-2);
   margin: 4px 0;
 }
 
 .mg-meta strong {
-  color: #ee0a24;
+  color: var(--gs-price);
 }
 
 .mg-countdown {
   font-size: 12px;
-  color: #e6a23c;
+  color: var(--gs-warning);
 }
 
 /* 参团弹窗 */
@@ -471,7 +475,7 @@ onBeforeUnmount(stopCountdown)
   margin-right: -8px;
   border: 2px solid #fff;
   background: #ffc9c1;
-  color: #ee0a24;
+  color: var(--gs-price);
   font-size: 13px;
 }
 
@@ -485,11 +489,11 @@ onBeforeUnmount(stopCountdown)
 .ongoing-missing {
   font-size: 13px;
   font-weight: 600;
-  color: #ee0a24;
+  color: var(--gs-price);
 }
 
 .ongoing-expire {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 </style>

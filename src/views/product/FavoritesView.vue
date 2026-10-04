@@ -32,7 +32,7 @@ onMounted(async () => {
 
 <style scoped>
 .favorites-page { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
-.page-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; color: #1a1a2e; }
+.page-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; color: var(--gs-text-1); }
 .product-grid { min-height: 300px; }
 .product-col { margin-bottom: 20px; }
 </style>

@@ -139,13 +139,13 @@ onMounted(fetchShipment)
 .page-title {
   font-size: 22px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--gs-text-1);
   margin: 0;
 }
 
 .info-card {
   margin-bottom: 20px;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
 }
 
 .carrier-info {
@@ -155,12 +155,12 @@ onMounted(fetchShipment)
 .carrier-name {
   font-size: 20px;
   font-weight: 700;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 
 .tracking-number {
   font-size: 14px;
-  color: #606266;
+  color: var(--gs-text-2);
   margin-top: 6px;
   display: flex;
   align-items: center;
@@ -170,7 +170,7 @@ onMounted(fetchShipment)
 .tn-value {
   font-family: 'Courier New', monospace;
   font-weight: 600;
-  background: #f5f7fa;
+  background: var(--gs-bg-hover);
   padding: 2px 8px;
   border-radius: 4px;
 }
@@ -181,19 +181,19 @@ onMounted(fetchShipment)
 
 .extra-info {
   font-size: 14px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin-top: 4px;
 }
 
 .timeline-card {
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
 }
 
 .timeline-title {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 20px;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 
 .timeline-node {
@@ -203,12 +203,12 @@ onMounted(fetchShipment)
 .node-status {
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 
 .node-location {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -217,7 +217,7 @@ onMounted(fetchShipment)
 
 .node-desc {
   font-size: 13px;
-  color: #606266;
+  color: var(--gs-text-2);
   line-height: 1.6;
 }
 

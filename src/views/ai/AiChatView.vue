@@ -328,7 +328,7 @@ onMounted(async () => {
   max-width: 860px;
   margin: 0 auto;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   overflow: hidden;
 }
@@ -348,7 +348,7 @@ onMounted(async () => {
 .header-title {
   font-size: 18px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 
 .tier-badge {
@@ -358,7 +358,7 @@ onMounted(async () => {
 .header-greeting {
   margin-top: 8px;
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
   font-style: italic;
 }
 
@@ -372,7 +372,7 @@ onMounted(async () => {
 
 .online-text {
   font-size: 13px;
-  color: #67c23a;
+  color: var(--gs-success);
 }
 
 /* 消息区域 */
@@ -403,7 +403,7 @@ onMounted(async () => {
 .avatar {
   flex-shrink: 0;
   background: #e8f4fd;
-  color: #409eff;
+  color: var(--gs-primary);
 }
 
 .message-row.user .avatar {
@@ -453,7 +453,7 @@ onMounted(async () => {
 }
 
 .product-card:hover {
-  border-color: #409eff;
+  border-color: var(--gs-primary);
   box-shadow: 0 2px 10px rgba(64, 158, 255, 0.15);
 }
 
@@ -470,8 +470,8 @@ onMounted(async () => {
   justify-content: center;
   width: 100%;
   height: 100%;
-  background: #f5f7fa;
-  color: #c0c4cc;
+  background: var(--gs-bg-hover);
+  color: var(--gs-text-3);
 }
 
 .card-info {
@@ -481,7 +481,7 @@ onMounted(async () => {
 
 .card-name {
   font-size: 13px;
-  color: #303133;
+  color: var(--gs-text-1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -500,7 +500,7 @@ onMounted(async () => {
 
 .bubble.assistant {
   background: #f4f4f5;
-  color: #303133;
+  color: var(--gs-text-1);
   border-top-left-radius: 4px;
 }
 
@@ -550,7 +550,7 @@ onMounted(async () => {
 
 .quick-label {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin-bottom: 10px;
 }
 

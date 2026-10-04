@@ -32,7 +32,12 @@
             </el-col>
           </el-row>
         </template>
-        <el-empty v-if="!loading && productList.length === 0" description="未找到相关商品，试试换个关键词吧" />
+        <el-empty v-if="!loading && productList.length === 0" description="未找到相关商品，试试换个关键词吧">
+          <div class="empty-actions">
+            <el-button type="primary" @click="$router.push({ path: '/ai/search', query: { keyword } })">用 AI 语义搜索再试</el-button>
+            <el-button @click="$router.push('/products')">浏览全部商品</el-button>
+          </div>
+        </el-empty>
       </div>
 
       <!-- 分页 -->
@@ -163,7 +168,7 @@ function handlePageChange(newPage) {
 
 <style scoped>
 .search-page {
-  background: #f5f7fa;
+  background: var(--gs-bg-hover);
   min-height: 100%;
   padding: 30px 0 60px;
 }
@@ -181,7 +186,7 @@ function handlePageChange(newPage) {
 .page-title {
   font-size: 22px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
   margin: 0;
 }
 .tier-badge {
@@ -197,7 +202,7 @@ function handlePageChange(newPage) {
 }
 .mode-hint {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 .search-grid {
   min-height: 300px;

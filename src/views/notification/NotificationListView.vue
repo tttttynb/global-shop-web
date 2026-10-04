@@ -231,7 +231,7 @@ async function handleDelete(id) {
 .title-text {
   font-weight: 600;
   font-size: 14px;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 .notif-content {
   font-size: 13px;

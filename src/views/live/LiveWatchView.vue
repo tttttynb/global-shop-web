@@ -441,7 +441,7 @@ onUnmounted(() => {
   text-align: center;
 }
 .login-tip a {
-  color: #409eff;
+  color: var(--gs-primary);
 }
 
 /* 商品面板 */
@@ -464,7 +464,7 @@ onUnmounted(() => {
   position: relative;
 }
 .live-product-item:hover {
-  background: #f5f7fa;
+  background: var(--gs-bg-hover);
 }
 .live-product-item.explaining {
   background: #fef0f0;
@@ -482,7 +482,7 @@ onUnmounted(() => {
   justify-content: center;
   width: 100%;
   height: 100%;
-  background: #f5f5f5;
+  background: var(--gs-bg-hover);
   color: #ccc;
 }
 .product-detail {
@@ -498,7 +498,7 @@ onUnmounted(() => {
   margin-bottom: 4px;
 }
 .product-price {
-  color: #f56c6c;
+  color: var(--gs-price);
   font-size: 15px;
   font-weight: 600;
 }

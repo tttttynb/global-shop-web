@@ -195,7 +195,7 @@ onMounted(loadRecord)
 
 /* 状态横幅 */
 .status-banner {
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   padding: 20px;
   text-align: center;
   color: #fff;
@@ -228,7 +228,7 @@ onMounted(loadRecord)
 
 /* 卡片 */
 .record-card {
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   margin-bottom: 16px;
 }
 
@@ -251,8 +251,8 @@ onMounted(loadRecord)
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f7fa;
-  color: #c0c4cc;
+  background: var(--gs-bg-hover);
+  color: var(--gs-text-3);
 }
 
 .pr-info {
@@ -263,13 +263,13 @@ onMounted(loadRecord)
 .pr-name {
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
   margin-bottom: 4px;
 }
 
 .pr-shop {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin-bottom: 8px;
 }
 
@@ -282,12 +282,12 @@ onMounted(loadRecord)
 .pr-group-price {
   font-size: 22px;
   font-weight: 700;
-  color: #ee0a24;
+  color: var(--gs-price);
 }
 
 .pr-origin-price {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
   text-decoration: line-through;
 }
 
@@ -295,7 +295,7 @@ onMounted(loadRecord)
 .members-title {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
   margin-bottom: 14px;
 }
 
@@ -316,7 +316,7 @@ onMounted(loadRecord)
 
 .member-slot .el-avatar {
   background: #ffc9c1;
-  color: #ee0a24;
+  color: var(--gs-price);
   font-size: 18px;
 }
 
@@ -328,13 +328,13 @@ onMounted(loadRecord)
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #c0c4cc;
+  color: var(--gs-text-3);
   font-size: 20px;
 }
 
 .member-name {
   font-size: 12px;
-  color: #606266;
+  color: var(--gs-text-2);
   max-width: 64px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -372,11 +372,11 @@ onMounted(loadRecord)
 .qr-wrap {
   padding: 12px;
   border: 1px solid #ebeef5;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   background: #fff;
 }
 .share-hint {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 </style>

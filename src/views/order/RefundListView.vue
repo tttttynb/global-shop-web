@@ -60,10 +60,10 @@ onMounted(loadList)
 <style scoped>
 .refund-list-page { max-width: 700px; margin: 0 auto; padding: 24px 16px; }
 .page-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; }
-.refund-card { margin-bottom: 12px; border-radius: 12px; }
+.refund-card { margin-bottom: 12px; border-radius: var(--gs-radius-lg); }
 .refund-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
-.refund-info { display: flex; justify-content: space-between; font-size: 13px; color: #606266; margin-bottom: 4px; }
-.refund-amount { color: #f56c6c; font-weight: 600; }
-.refund-reason { font-size: 13px; color: #909399; }
+.refund-info { display: flex; justify-content: space-between; font-size: 13px; color: var(--gs-text-2); margin-bottom: 4px; }
+.refund-amount { color: var(--gs-price); font-weight: 600; }
+.refund-reason { font-size: 13px; color: var(--gs-text-3); }
 .refund-actions { margin-top: 8px; text-align: right; }
 </style>

@@ -153,14 +153,14 @@ onMounted(() => { loadProfile(); loadAddresses() })
 
 <style scoped>
 .profile-page { max-width: 700px; margin: 0 auto; padding: 24px 16px; }
-.page-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; color: #1a1a2e; }
-.profile-card { border-radius: 12px; }
+.page-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; color: var(--gs-text-1); }
+.profile-card { border-radius: var(--gs-radius-lg); }
 .card-header { display: flex; justify-content: space-between; align-items: center; }
 .address-item { padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
 .address-item:last-child { border-bottom: none; }
 .address-info { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .addr-name { font-weight: 600; }
-.addr-phone { color: #909399; font-size: 13px; }
-.addr-detail { font-size: 14px; color: #606266; margin-bottom: 4px; }
+.addr-phone { color: var(--gs-text-3); font-size: 13px; }
+.addr-detail { font-size: 14px; color: var(--gs-text-2); margin-bottom: 4px; }
 .addr-actions { display: flex; gap: 4px; }
 </style>

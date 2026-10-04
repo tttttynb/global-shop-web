@@ -80,6 +80,15 @@
 
         <!-- 支付成功后操作 -->
         <div v-if="payResult && payResult.status === 1" class="pay-actions">
+          <!-- 🎁 晒单返积分引导（闭环：支付成功 → 收货 → 评价返积分 → 抵现） -->
+          <div class="points-guide">
+            <span class="pg-icon">🎁</span>
+            <div class="pg-body">
+              <p class="pg-title">确认收货后评价晒单，返 10 积分/条</p>
+              <p class="pg-sub">100 积分 = 1 元下单可抵扣 · 积分中心可每日签到、兑换优惠券</p>
+            </div>
+            <el-button size="small" text type="primary" @click="$router.push('/points')">积分中心 ›</el-button>
+          </div>
           <el-button type="primary" @click="$router.push('/orders')">{{ $t('pay.viewOrder') }}</el-button>
           <el-button @click="$router.push('/')">{{ $t('pay.continueShopping') }}</el-button>
         </div>
@@ -315,19 +324,19 @@ async function handleRecharge() {
 .pay-title {
   font-size: 22px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--gs-text-1);
   margin-bottom: 8px;
 }
 
 .pay-order-id {
   font-size: 14px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin-bottom: 8px;
 }
 
 .pay-amount {
   font-size: 16px;
-  color: #303133;
+  color: var(--gs-text-1);
   margin-bottom: 16px;
 }
 
@@ -350,24 +359,24 @@ async function handleRecharge() {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
-  color: #606266;
+  color: var(--gs-text-2);
   padding: 3px 0;
 }
 .bd-discount {
-  color: #67c23a;
+  color: var(--gs-success);
 }
 
 .balance-tip {
   font-size: 14px;
-  color: #606266;
+  color: var(--gs-text-2);
   margin-bottom: 20px;
   padding: 8px 12px;
-  background: #f5f7fa;
+  background: var(--gs-bg-hover);
   border-radius: 8px;
 }
 
 .balance-ok {
-  color: #67c23a;
+  color: var(--gs-success);
   font-weight: 600;
 }
 
@@ -391,7 +400,7 @@ async function handleRecharge() {
 
 .method-label {
   font-size: 14px;
-  color: #606266;
+  color: var(--gs-text-2);
   margin-bottom: 12px;
 }
 
@@ -411,7 +420,7 @@ async function handleRecharge() {
 }
 
 .channel-item:hover {
-  border-color: #409eff;
+  border-color: var(--gs-primary);
 }
 
 .channel-label {
@@ -422,7 +431,7 @@ async function handleRecharge() {
 .channel-tag {
   font-size: 11px;
   background: #ecf5ff;
-  color: #409eff;
+  color: var(--gs-primary);
   padding: 2px 8px;
   border-radius: 4px;
   margin-left: 8px;
@@ -430,7 +439,7 @@ async function handleRecharge() {
 
 .no-channel {
   font-size: 14px;
-  color: #909399;
+  color: var(--gs-text-3);
   padding: 20px;
 }
 
@@ -448,13 +457,13 @@ async function handleRecharge() {
 .result-text {
   font-size: 18px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
   margin: 12px 0 4px;
 }
 
 .result-amount {
   font-size: 14px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 
 .third-party-pay {
@@ -466,13 +475,13 @@ async function handleRecharge() {
 
 .mock-hint {
   font-size: 13px;
-  color: #e6a23c;
+  color: var(--gs-warning);
   margin-bottom: 8px;
 }
 
 .polling-hint {
   font-size: 13px;
-  color: #409eff;
+  color: var(--gs-primary);
   margin-top: 8px;
   animation: pulse 1.5s infinite;
 }
@@ -487,5 +496,31 @@ async function handleRecharge() {
   gap: 12px;
   justify-content: center;
   margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+/* 🎁 晒单返积分引导卡 */
+.points-guide {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: color-mix(in srgb, var(--gs-warning) 8%, #fff);
+  border: 1px dashed color-mix(in srgb, var(--gs-warning) 45%, #fff);
+  border-radius: var(--gs-radius);
+  padding: 12px 16px;
+  text-align: left;
+}
+.pg-icon { font-size: 24px; flex-shrink: 0; }
+.pg-body { flex: 1; min-width: 0; }
+.pg-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gs-text-1);
+  margin-bottom: 2px;
+}
+.pg-sub {
+  font-size: 12px;
+  color: var(--gs-text-3);
 }
 </style>

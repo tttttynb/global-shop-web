@@ -256,7 +256,7 @@ onMounted(loadAll)
 .page-title {
   font-size: 24px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--gs-text-1);
   margin-bottom: 16px;
 }
 
@@ -282,13 +282,13 @@ onMounted(loadAll)
 .points-balance {
   font-size: 40px;
   font-weight: 800;
-  color: #e6a23c;
+  color: var(--gs-warning);
   line-height: 1.1;
 }
 
 .points-label {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin-top: 2px;
 }
 
@@ -313,7 +313,7 @@ onMounted(loadAll)
 
 .growth-text {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 
 .growth-bar {
@@ -328,7 +328,7 @@ onMounted(loadAll)
 
 .streak-row {
   font-size: 12px;
-  color: #ee0a24;
+  color: var(--gs-price);
   margin-top: 4px;
 }
 
@@ -356,7 +356,7 @@ onMounted(loadAll)
   gap: 14px;
   background: #fff;
   border: 1px solid #fbe4c8;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   padding: 16px;
 }
 
@@ -365,7 +365,7 @@ onMounted(loadAll)
   text-align: center;
   font-size: 22px;
   font-weight: 800;
-  color: #e6a23c;
+  color: var(--gs-warning);
   border-right: 1px dashed #f0d9b5;
   padding-right: 10px;
 }
@@ -378,7 +378,7 @@ onMounted(loadAll)
 .cc-name {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -387,7 +387,7 @@ onMounted(loadAll)
 .cc-condition,
 .cc-stock {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin-top: 3px;
 }
 
@@ -398,23 +398,23 @@ onMounted(loadAll)
 .cc-points {
   font-size: 14px;
   font-weight: 700;
-  color: #ee0a24;
+  color: var(--gs-price);
   margin-bottom: 6px;
 }
 
 /* 流水表 */
 .records-table {
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   overflow: hidden;
 }
 
 .change-plus {
-  color: #67c23a;
+  color: var(--gs-success);
   font-weight: 700;
 }
 
 .change-minus {
-  color: #ee0a24;
+  color: var(--gs-price);
   font-weight: 700;
 }
 </style>

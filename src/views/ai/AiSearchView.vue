@@ -265,14 +265,14 @@ async function doImageSearch() {
 .hero-title {
   font-size: 36px;
   font-weight: 700;
-  color: #303133;
+  color: var(--gs-text-1);
   margin: 0 0 8px;
   letter-spacing: 2px;
 }
 
 .hero-subtitle {
   font-size: 16px;
-  color: #606266;
+  color: var(--gs-text-2);
   margin: 0 0 24px;
 }
 
@@ -315,7 +315,7 @@ async function doImageSearch() {
 
 .tags-label {
   font-size: 14px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 
 .example-tag {
@@ -325,8 +325,8 @@ async function doImageSearch() {
 }
 
 .example-tag:hover {
-  color: #409eff;
-  border-color: #409eff;
+  color: var(--gs-primary);
+  border-color: var(--gs-primary);
   background: #ecf5ff;
 }
 
@@ -357,27 +357,27 @@ async function doImageSearch() {
 }
 
 .upload-zone:hover {
-  border-color: #409eff;
+  border-color: var(--gs-primary);
   background: #fff;
   box-shadow: 0 6px 24px rgba(64, 158, 255, 0.15);
 }
 
 .upload-zone.has-image {
   border-style: solid;
-  border-color: #409eff;
+  border-color: var(--gs-primary);
 }
 
 .upload-tip {
   margin: 0;
   font-size: 15px;
   font-weight: 600;
-  color: #409eff;
+  color: var(--gs-primary);
 }
 
 .upload-sub {
   margin: 0;
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 
 .preview-img {
@@ -416,12 +416,12 @@ async function doImageSearch() {
 
 .recognized-label {
   font-weight: 600;
-  color: #409eff;
+  color: var(--gs-primary);
   margin-right: 6px;
 }
 
 .recognized-desc {
-  color: #606266;
+  color: var(--gs-text-2);
   margin-left: 6px;
 }
 
@@ -438,23 +438,23 @@ async function doImageSearch() {
   align-items: center;
   justify-content: center;
   padding: 80px 0;
-  color: #c0c4cc;
+  color: var(--gs-text-3);
 }
 
 .guide-text {
   margin-top: 16px;
   font-size: 15px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 
 .result-count {
   font-size: 15px;
-  color: #606266;
+  color: var(--gs-text-2);
   margin-bottom: 20px;
 }
 
 .result-count strong {
-  color: #409eff;
+  color: var(--gs-primary);
 }
 
 .result-col {

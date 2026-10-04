@@ -58,5 +58,5 @@ async function handleSubmit() {
 <style scoped>
 .refund-page { max-width: 600px; margin: 0 auto; padding: 24px 16px; }
 .page-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; }
-.refund-card { border-radius: 12px; }
+.refund-card { border-radius: var(--gs-radius-lg); }
 </style>

@@ -53,12 +53,12 @@ onMounted(async () => {
 <style scoped>
 .coupon-page { max-width: 700px; margin: 0 auto; padding: 24px 16px; }
 .page-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; }
-.coupon-card { margin-bottom: 12px; border-radius: 12px; }
+.coupon-card { margin-bottom: 12px; border-radius: var(--gs-radius-lg); }
 .coupon-card :deep(.el-card__body) { display: flex; align-items: center; gap: 20px; }
 .coupon-left { width: 100px; text-align: center; flex-shrink: 0; }
-.coupon-value { font-size: 24px; font-weight: 700; color: #f56c6c; }
-.coupon-condition { font-size: 12px; color: #909399; }
+.coupon-value { font-size: 24px; font-weight: 700; color: var(--gs-price); }
+.coupon-condition { font-size: 12px; color: var(--gs-text-3); }
 .coupon-right { flex: 1; }
 .coupon-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
-.coupon-expire { font-size: 12px; color: #909399; }
+.coupon-expire { font-size: 12px; color: var(--gs-text-3); }
 </style>

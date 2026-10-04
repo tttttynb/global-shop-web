@@ -74,14 +74,14 @@ async function handleLogin() {
   width: 420px;
   padding: 40px 36px 30px;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 .login-title {
   text-align: center;
   font-size: 24px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
   margin-bottom: 30px;
 }
 .login-btn {
@@ -90,11 +90,11 @@ async function handleLogin() {
 .login-footer {
   text-align: center;
   font-size: 14px;
-  color: #909399;
+  color: var(--gs-text-3);
   margin-top: 12px;
 }
 .login-footer a {
-  color: #409eff;
+  color: var(--gs-primary);
   text-decoration: none;
 }
 .login-footer a:hover {

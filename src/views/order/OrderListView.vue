@@ -26,7 +26,7 @@
 
         <div class="order-items">
           <div v-for="item in order.items" :key="item.id" class="order-item">
-            <span class="oi-name">{{ item.productName }}<em v-if="item.skuSpec && item.skuSpec !== '默认规格'" style="font-style:normal;font-size:12px;color:#909399;background:#f5f7fa;border-radius:4px;padding:1px 6px;margin-left:6px;">{{ item.skuSpec }}</em></span>
+            <span class="oi-name">{{ item.productName }}<em v-if="item.skuSpec && item.skuSpec !== '默认规格'" style="font-style:normal;font-size:12px;color:var(--gs-text-3);background:#f5f7fa;border-radius:4px;padding:1px 6px;margin-left:6px;">{{ item.skuSpec }}</em></span>
             <span class="oi-quantity">x{{ item.quantity }}</span>
             <span class="oi-price">¥{{ item.price.toFixed(2) }}</span>
           </div>
@@ -132,7 +132,7 @@ onMounted(() => {
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 20px;
-  color: #1a1a2e;
+  color: var(--gs-text-1);
 }
 
 .order-tabs {
@@ -141,7 +141,7 @@ onMounted(() => {
 
 .order-card {
   margin-bottom: 16px;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
 }
 
 .order-header {
@@ -162,12 +162,12 @@ onMounted(() => {
 .order-id {
   font-size: 14px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 
 .order-time {
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 
 .order-items {
@@ -180,7 +180,7 @@ onMounted(() => {
   gap: 16px;
   padding: 8px 0;
   font-size: 14px;
-  color: #606266;
+  color: var(--gs-text-2);
 }
 
 .oi-name {
@@ -191,7 +191,7 @@ onMounted(() => {
 }
 
 .oi-quantity {
-  color: #909399;
+  color: var(--gs-text-3);
   min-width: 40px;
   text-align: center;
 }
@@ -212,7 +212,7 @@ onMounted(() => {
 
 .order-total {
   font-size: 14px;
-  color: #606266;
+  color: var(--gs-text-2);
 }
 
 .total-amount {

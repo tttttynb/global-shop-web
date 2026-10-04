@@ -212,12 +212,12 @@ onMounted(() => {
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 24px;
-  color: #1a1a2e;
+  color: var(--gs-text-1);
 }
 
 .shop-card {
   margin-bottom: 16px;
-  border-radius: 12px;
+  border-radius: var(--gs-radius-lg);
 }
 
 .shop-header {
@@ -226,7 +226,7 @@ onMounted(() => {
   gap: 8px;
   font-size: 16px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 
 .cart-item {
@@ -255,8 +255,8 @@ onMounted(() => {
   justify-content: center;
   width: 100%;
   height: 100%;
-  background: #f5f7fa;
-  color: #c0c4cc;
+  background: var(--gs-bg-hover);
+  color: var(--gs-text-3);
   font-size: 24px;
 }
 
@@ -269,7 +269,7 @@ onMounted(() => {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #303133;
+  color: var(--gs-text-1);
   text-decoration: none;
   margin-bottom: 8px;
   overflow: hidden;
@@ -278,14 +278,14 @@ onMounted(() => {
 }
 
 .item-name:hover {
-  color: #409eff;
+  color: var(--gs-primary);
 }
 
 .item-spec {
   display: inline-block;
   font-size: 12px;
-  color: #909399;
-  background: #f5f7fa;
+  color: var(--gs-text-3);
+  background: var(--gs-bg-hover);
   border-radius: 4px;
   padding: 2px 8px;
   margin-bottom: 6px;
@@ -293,12 +293,12 @@ onMounted(() => {
 
 .item-price {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 
 .item-quantity {
   font-size: 14px;
-  color: #606266;
+  color: var(--gs-text-2);
   min-width: 40px;
   text-align: center;
 }
@@ -328,14 +328,14 @@ onMounted(() => {
 
 .total-info {
   font-size: 15px;
-  color: #606266;
+  color: var(--gs-text-2);
 }
 
 /* 🆕 结算栏运费/税费提示（Phase 3 - F6） */
 .bar-tax-hint {
   margin-right: auto;
   font-size: 12px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 
 /* 🆕 积分抵扣（Phase 4 - F8） */

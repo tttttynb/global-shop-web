@@ -26,7 +26,7 @@
             </el-image>
             <div class="item-info">
               <span class="item-name">{{ item.productName }}</span>
-              <span v-if="item.skuSpec && item.skuSpec !== '默认规格'" class="item-spec" style="font-size:12px;color:#909399;background:#f5f7fa;border-radius:4px;padding:2px 8px;align-self:flex-start;">{{ item.skuSpec }}</span>
+              <span v-if="item.skuSpec && item.skuSpec !== '默认规格'" class="item-spec" style="font-size:12px;color:var(--gs-text-3);background:#f5f7fa;border-radius:4px;padding:2px 8px;align-self:flex-start;">{{ item.skuSpec }}</span>
               <span class="item-qty">x{{ item.quantity }}</span>
             </div>
             <span class="item-price">{{ localeStore.formatPrice(item.price) }}</span>
@@ -157,25 +157,25 @@ onMounted(async () => {
 <style scoped>
 .order-detail-page { max-width: 700px; margin: 0 auto; padding: 24px 16px; }
 .page-title { font-size: 24px; font-weight: 700; margin-bottom: 24px; }
-.detail-card { border-radius: 12px; }
+.detail-card { border-radius: var(--gs-radius-lg); }
 .order-header { display: flex; justify-content: space-between; align-items: center; }
 .order-id { font-weight: 600; font-size: 16px; }
 .address-section h3 { font-size: 16px; margin-bottom: 8px; }
-.address-section p { font-size: 14px; color: #606266; margin: 4px 0; }
+.address-section p { font-size: 14px; color: var(--gs-text-2); margin: 4px 0; }
 .order-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
 .order-item:last-child { border-bottom: none; }
 .item-image { width: 60px; height: 60px; border-radius: 6px; flex-shrink: 0; }
-.img-placeholder { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: #f5f5f5; color: #ccc; }
+.img-placeholder { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: var(--gs-bg-hover); color: #ccc; }
 .item-info { flex: 1; display: flex; justify-content: space-between; }
 .item-name { font-size: 14px; }
-.item-qty { color: #909399; }
-.item-price { font-weight: 600; color: #f56c6c; min-width: 80px; text-align: right; }
+.item-qty { color: var(--gs-text-3); }
+.item-price { font-weight: 600; color: var(--gs-price); min-width: 80px; text-align: right; }
 .order-summary { margin-top: 12px; }
-.summary-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; color: #606266; }
+.summary-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; color: var(--gs-text-2); }
 .total-amount { font-size: 20px; font-weight: 700; color: #e6323e; }
-.discount { color: #67c23a; }
+.discount { color: var(--gs-success); }
 /* 🆕 锁汇快照行（Phase 3 - F5） */
-.forex-row span:last-child { font-size: 12px; color: #409eff; text-align: right; }
+.forex-row span:last-child { font-size: 12px; color: var(--gs-primary); text-align: right; }
 .order-actions { margin-top: 16px; text-align: right; }
 
 /* Shipping card */
@@ -189,7 +189,7 @@ onMounted(async () => {
 .shipping-card h3 {
   font-size: 16px;
   margin: 0 0 12px 0;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 .shipping-info {
   display: flex;
@@ -200,16 +200,16 @@ onMounted(async () => {
 .shipping-carrier {
   font-size: 15px;
   font-weight: 600;
-  color: #303133;
+  color: var(--gs-text-1);
 }
 .shipping-tracking {
   font-size: 14px;
-  color: #606266;
+  color: var(--gs-text-2);
   font-family: 'Courier New', monospace;
 }
 .shipping-time {
   font-size: 13px;
-  color: #909399;
+  color: var(--gs-text-3);
 }
 .shipping-actions {
   display: flex;
