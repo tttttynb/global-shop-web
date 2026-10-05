@@ -19,19 +19,53 @@
 
       <div class="header-right">
         <div class="search-box">
-          <el-input
-            v-model="searchKeyword"
-            :placeholder="$t('header.searchPlaceholder')"
-            @keyup.enter="handleSearch"
-            size="default"
-            clearable
+          <!-- 淘宝式搜索下拉：搜索历史 + 热搜榜 -->
+          <el-popover
+            trigger="focus"
+            placement="bottom-start"
+            :width="320"
+            popper-class="search-suggest-popper"
           >
-            <template #append>
-              <el-button @click="handleSearch">
-                <el-icon><Search /></el-icon>
-              </el-button>
+            <template #reference>
+              <el-input
+                v-model="searchKeyword"
+                :placeholder="$t('header.searchPlaceholder')"
+                @keyup.enter="handleSearch"
+                size="default"
+                clearable
+              >
+                <template #append>
+                  <el-button @click="handleSearch">
+                    <el-icon><Search /></el-icon>
+                  </el-button>
+                </template>
+              </el-input>
             </template>
-          </el-input>
+            <div class="search-suggest">
+              <div class="ss-section" v-if="searchHistory.length">
+                <div class="ss-head">
+                  <span>搜索历史</span>
+                  <el-icon class="ss-clear" :size="14" @click="clearSearchHistory"><Delete /></el-icon>
+                </div>
+                <div class="ss-chips">
+                  <span v-for="w in searchHistory" :key="w" class="ss-chip" @click="quickSearch(w)">{{ w }}</span>
+                </div>
+              </div>
+              <div class="ss-section">
+                <div class="ss-head"><span>热搜榜</span></div>
+                <div
+                  class="ss-hot-item"
+                  v-for="(w, i) in hotWords"
+                  :key="w"
+                  @click="quickSearch(w)"
+                >
+                  <span class="ss-rank" :class="{ top: i < 3 }">{{ i + 1 }}</span>
+                  <span class="ss-word">{{ w }}</span>
+                  <span class="ss-hot-tag" v-if="i < 2">🔥</span>
+                </div>
+              </div>
+            </div>
+          </el-popover>
           <!-- 🆕 以图搜图入口（Phase 2 - F4） -->
           <el-tooltip :content="$t('header.imageSearchTip')" placement="bottom">
             <router-link to="/ai/search?mode=image" class="camera-entry">
@@ -180,6 +214,30 @@ const notifCount = ref(0)
 let notifTimer = null
 let ws = null
 
+// ==================== 淘宝式搜索下拉：热搜榜 + 搜索历史 ====================
+const hotWords = ['蓝牙耳机', 'Switch', '香水', '精华', '运动鞋', '坚果']
+const HISTORY_KEY = 'searchHistory'
+const searchHistory = ref(JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'))
+
+function saveSearchHistory(word) {
+  if (!word) return
+  const list = [word, ...searchHistory.value.filter(w => w !== word)].slice(0, 8)
+  searchHistory.value = list
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(list))
+}
+
+function clearSearchHistory() {
+  searchHistory.value = []
+  localStorage.removeItem(HISTORY_KEY)
+}
+
+/** 点热搜/历史词直接搜索（闭环：点词 → 结果页） */
+function quickSearch(word) {
+  searchKeyword.value = word
+  saveSearchHistory(word)
+  router.push({ path: '/search', query: { keyword: word } })
+}
+
 // 🆕 语言切换（Phase 3 - F5）：界面语言即时生效，商品文案由各页面按 locale 重新拉取
 function handleLangChange(code) {
   if (code === localeStore.locale) return
@@ -325,8 +383,10 @@ function goToNotifications() {
 }
 
 function handleSearch() {
-  if (searchKeyword.value.trim()) {
-    router.push({ path: '/search', query: { keyword: searchKeyword.value.trim() } })
+  const kw = searchKeyword.value.trim()
+  if (kw) {
+    saveSearchHistory(kw)
+    router.push({ path: '/search', query: { keyword: kw } })
   }
 }
 
@@ -455,6 +515,63 @@ function handleLogout() {
 .search-box :deep(.el-input-group__append .el-icon) {
   color: #fff;
 }
+/* 淘宝式搜索下拉（槽内容携带本组件作用域） */
+.search-suggest { padding: 4px 2px; }
+.ss-section + .ss-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--gs-divider);
+}
+.ss-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--gs-text-3);
+  margin-bottom: 8px;
+}
+.ss-clear { cursor: pointer; }
+.ss-clear:hover { color: var(--gs-primary); }
+.ss-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ss-chip {
+  font-size: 13px;
+  color: var(--gs-text-2);
+  background: var(--gs-bg-hover);
+  border-radius: 999px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ss-chip:hover {
+  color: var(--gs-primary);
+  background: color-mix(in srgb, var(--gs-primary) 8%, #fff);
+}
+.ss-hot-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: var(--gs-radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--gs-text-1);
+}
+.ss-hot-item:hover { background: var(--gs-bg-hover); }
+.ss-rank {
+  width: 18px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--gs-text-3);
+  font-style: italic;
+  font-weight: 700;
+}
+.ss-rank.top { color: var(--gs-price); }
+.ss-word { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ss-hot-tag { font-size: 12px; }
 /* 🆕 以图搜图相机入口 */
 .camera-entry {
   display: flex;

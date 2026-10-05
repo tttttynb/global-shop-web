@@ -46,7 +46,7 @@
       </div>
 
       <!-- 正在直播 -->
-      <section class="section" v-if="liveList.length > 0">
+      <section class="section" v-if="liveList.length > 0" :style="{ '--sec-accent': sectionAccents[0] }">
         <div class="section-header">
           <h2 class="section-title">🔴 正在直播</h2>
           <router-link to="/live" class="section-more">查看全部 ›</router-link>
@@ -67,6 +67,48 @@
               <div class="live-info">
                 <h4 class="live-title">{{ live.title }}</h4>
                 <span class="live-viewers"><el-icon><View /></el-icon> {{ live.viewerCount || 0 }}</span>
+              </div>
+            </el-card>
+          </div>
+        </div>
+      </section>
+
+      <!-- 🔥 拼团进行中（拼邮费 · 成团前不发货） -->
+      <section class="section" v-if="groupActivities.length > 0" :style="{ '--sec-accent': '#ee0a24' }">
+        <div class="section-header">
+          <div class="section-title-row">
+            <h2 class="section-title">🔥 拼团进行中</h2>
+            <span class="section-subtitle">邀好友一起拼，越拼越便宜</span>
+          </div>
+          <router-link to="/group-buy" class="section-more">拼团专区 ›</router-link>
+        </div>
+        <div class="live-scroll-wrapper">
+          <div class="live-scroll">
+            <el-card
+              v-for="a in groupActivities.slice(0, 8)"
+              :key="a.activityId"
+              shadow="hover"
+              class="live-card group-card"
+              @click="$router.push('/group-buy')"
+            >
+              <div class="live-cover">
+                <el-image :src="a.coverImage" fit="cover" class="live-cover-img">
+                  <template #error>
+                    <div class="live-cover-placeholder">
+                      <el-icon :size="32"><Picture /></el-icon>
+                    </div>
+                  </template>
+                </el-image>
+                <span class="group-badge">{{ a.requiredMembers }}人团</span>
+              </div>
+              <div class="live-info">
+                <h4 class="live-title">{{ a.productName }}</h4>
+                <div class="group-price-row">
+                  <span class="group-price">{{ localeStore.formatPrice(a.groupPrice) }}</span>
+                  <span class="group-origin">{{ localeStore.formatPrice(a.originalPrice) }}</span>
+                </div>
+                <span class="group-sold" v-if="a.ongoingGroups > 0">{{ a.ongoingGroups }} 个团在拼</span>
+                <span class="group-sold" v-else-if="a.soldCount > 0">已拼 {{ a.soldCount }} 件</span>
               </div>
             </el-card>
           </div>
@@ -140,6 +182,8 @@
 import { ref, onMounted } from 'vue'
 import { getHomeFeed, getCategoryList } from '@/api/product'
 import { getLiveList } from '@/api/live'
+import { getGroupActivities } from '@/api/groupBuy'
+import { useLocaleStore } from '@/stores/locale'
 
 const banners = [
   { title: 'GlobalShop 全球好物', desc: '精选全球优质商品，品质生活从这里开始', bg: 'linear-gradient(135deg, #165dff 0%, #69a0ff 100%)' },
@@ -152,6 +196,8 @@ const liveList = ref([])
 const feedSections = ref([])
 const feedLoading = ref(true)
 const categories = ref([])
+const groupActivities = ref([])
+const localeStore = useLocaleStore()
 
 // 分区跳色：让各楼层标题条/链接色轮换，打破全蓝的单调节奏
 const sectionAccents = ['#165dff', '#ee0a24', '#ff8f1f', '#00b578']
@@ -164,7 +210,17 @@ onMounted(() => {
   loadLiveList()
   loadFeed()
   loadCategories()
+  loadGroupActivities()
 })
+
+async function loadGroupActivities() {
+  try {
+    const res = await getGroupActivities()
+    groupActivities.value = res.code === 200 ? (res.data || []) : []
+  } catch {
+    groupActivities.value = []
+  }
+}
 
 async function loadCategories() {
   try {
@@ -434,6 +490,43 @@ async function loadFeed() {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+/* 拼团楼层卡片 */
+.group-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: var(--gs-price);
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.group-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.group-price {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gs-price);
+  letter-spacing: -0.3px;
+}
+.group-origin {
+  font-size: 12px;
+  color: var(--gs-text-3);
+  text-decoration: line-through;
+}
+.group-sold {
+  font-size: 12px;
+  color: var(--gs-text-3);
+}
+.group-card :deep(.el-card__body) {
+  padding: 0;
 }
 
 .product-col {
