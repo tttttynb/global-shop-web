@@ -33,7 +33,9 @@
             <div v-for="(m, i) in messages" :key="i" class="dp-row" :class="m.role">
               <div v-if="m.role === 'assistant'" class="dp-avatar"><el-icon :size="16"><Service /></el-icon></div>
               <div class="dp-bubble-col">
-                <div class="dp-bubble" :class="m.role">{{ m.content }}</div>
+                <!-- AI 回复渲染轻量 Markdown（加粗/列表/分隔线）；用户消息保持纯文本 -->
+                <div v-if="m.role === 'assistant'" class="dp-bubble assistant md" v-html="richText(m.content)"></div>
+                <div v-else class="dp-bubble user">{{ m.content }}</div>
                 <!-- 商品卡：AI 推荐可直加购（与全屏页同源能力） -->
                 <div v-if="m.products && m.products.length" class="dp-products">
                   <div
@@ -122,6 +124,7 @@ import { ElMessage } from 'element-plus'
 import { Service, User, Picture, Close, Promotion } from '@element-plus/icons-vue'
 import { chatWithAi } from '@/api/ai'
 import { addToCart } from '@/api/cart'
+import { renderRichText as richText } from '@/utils/richText'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 import { useLocaleStore } from '@/stores/locale'
@@ -456,6 +459,35 @@ onBeforeUnmount(() => {
   background: var(--gs-primary);
   color: #fff;
   border-top-right-radius: 4px;
+}
+
+/* AI 回复富文本（renderRichText 产物）：块级元素接管排版，故关掉 pre-wrap
+   v-html 注入的内容不带 scoped 标记，必须用 :deep() 命中 */
+.dp-bubble.md {
+  white-space: normal;
+}
+.dp-bubble.md :deep(p) {
+  margin: 0 0 6px;
+}
+.dp-bubble.md :deep(p:last-child) {
+  margin-bottom: 0;
+}
+.dp-bubble.md :deep(strong) {
+  font-weight: 700;
+  color: var(--gs-text-1);
+}
+.dp-bubble.md :deep(ul),
+.dp-bubble.md :deep(ol) {
+  margin: 0 0 6px;
+  padding-left: 18px;
+}
+.dp-bubble.md :deep(li) {
+  margin-bottom: 3px;
+}
+.dp-bubble.md :deep(hr) {
+  border: none;
+  border-top: 1px solid var(--gs-border);
+  margin: 8px 0;
 }
 
 /* 商品卡 */

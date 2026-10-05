@@ -27,9 +27,9 @@
         </el-avatar>
 
         <div class="bubble-col">
-          <div class="bubble" :class="msg.role">
-            {{ msg.content }}
-          </div>
+          <!-- AI 回复渲染轻量 Markdown；用户消息保持纯文本 -->
+          <div v-if="msg.role === 'assistant'" class="bubble assistant md" v-html="richText(msg.content)"></div>
+          <div v-else class="bubble user">{{ msg.content }}</div>
 
           <!-- 🆕 商品卡片（Phase 4 - F10：工具命中商品可一键加购） -->
           <div v-if="msg.products && msg.products.length" class="product-cards">
@@ -136,6 +136,7 @@ import { chatWithAi, getUserProfile } from '@/api/ai'
 import { addToCart, batchAddToCart } from '@/api/cart'
 import { useCartStore } from '@/stores/cart'
 import { useLocaleStore } from '@/stores/locale'
+import { renderRichText as richText } from '@/utils/richText'
 
 const localeStore = useLocaleStore()
 const cartStore = useCartStore()
@@ -407,7 +408,7 @@ onMounted(async () => {
 }
 
 .message-row.user .avatar {
-  background: #409eff;
+  background: var(--gs-primary);
   color: #fff;
 }
 
@@ -499,15 +500,42 @@ onMounted(async () => {
 }
 
 .bubble.assistant {
-  background: #f4f4f5;
+  background: var(--gs-bg-hover);
   color: var(--gs-text-1);
   border-top-left-radius: 4px;
 }
 
 .bubble.user {
-  background: #409eff;
+  background: var(--gs-primary);
   color: #fff;
   border-top-right-radius: 4px;
+  white-space: pre-wrap;
+}
+
+/* AI 回复富文本（renderRichText 产物）
+   v-html 注入的内容不带 scoped 标记，必须用 :deep() 命中 */
+.bubble.md :deep(p) {
+  margin: 0 0 8px;
+}
+.bubble.md :deep(p:last-child) {
+  margin-bottom: 0;
+}
+.bubble.md :deep(strong) {
+  font-weight: 700;
+  color: var(--gs-text-1);
+}
+.bubble.md :deep(ul),
+.bubble.md :deep(ol) {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
+.bubble.md :deep(li) {
+  margin-bottom: 4px;
+}
+.bubble.md :deep(hr) {
+  border: none;
+  border-top: 1px solid var(--gs-border);
+  margin: 10px 0;
 }
 
 /* 打字动画 */
