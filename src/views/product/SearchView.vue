@@ -4,9 +4,21 @@
       <!-- 搜索标题行 -->
       <div class="search-header">
         <h2 class="page-title">搜索 "{{ keyword }}" 的结果</h2>
+        <span class="result-count" v-if="!loading && total > 0">共 {{ total }} 件相关商品</span>
         <el-tag v-if="userTier" :type="tierTagType" size="large" class="tier-badge">
           {{ tierLabel }}
         </el-tag>
+      </div>
+
+      <!-- 类目聚合（淘宝式结果页聚合，点击进类目筛选列表） -->
+      <div class="cat-chips" v-if="categoryChips.length > 1">
+        <span class="chip-label">相关类目：</span>
+        <span
+          v-for="c in categoryChips"
+          :key="c.id"
+          class="cat-chip"
+          @click="router.push({ path: '/products', query: { categoryId: c.id } })"
+        >{{ c.name }}<i>{{ c.count }}</i></span>
       </div>
 
       <!-- 搜索模式切换 -->
@@ -56,13 +68,14 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { searchProducts } from '@/api/product'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { searchProducts, getCategoryList } from '@/api/product'
 import { semanticSearch } from '@/api/ai'
 import ProductCard from '@/components/ProductCard.vue'
 
 const route = useRoute()
+const router = useRouter()
 
 const keyword = ref('')
 const productList = ref([])
@@ -79,13 +92,39 @@ const tierTagTypeMap = { PREMIUM: 'danger', MID: 'warning', BUDGET: 'success', N
 
 const tierLabel = ref('')
 const tierTagType = ref('info')
+const categories = ref([])
+
+/** 类目聚合 chips：从当前搜索结果统计，点击跳转类目筛选列表（淘宝式结果页聚合） */
+const categoryChips = computed(() => {
+  if (!productList.value.length || !categories.value.length) return []
+  const counts = new Map()
+  productList.value.forEach(p => {
+    if (p.categoryId) counts.set(p.categoryId, (counts.get(p.categoryId) || 0) + 1)
+  })
+  return [...counts.entries()]
+    .map(([id, count]) => {
+      const cat = categories.value.find(c => c.id === id)
+      return cat ? { id, name: cat.name, count } : null
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6)
+})
 
 onMounted(() => {
   keyword.value = route.query.keyword || ''
+  loadCategories()
   if (keyword.value) {
     doSearch()
   }
 })
+
+async function loadCategories() {
+  try {
+    const res = await getCategoryList()
+    categories.value = res.data || []
+  } catch {}
+}
 
 watch(() => route.query.keyword, (newVal) => {
   keyword.value = newVal || ''
@@ -214,5 +253,43 @@ function handlePageChange(newPage) {
   display: flex;
   justify-content: center;
   margin-top: 30px;
+}
+
+/* 结果数 + 类目聚合 chips */
+.result-count {
+  font-size: 13px;
+  color: var(--gs-text-3);
+}
+.cat-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.chip-label {
+  font-size: 13px;
+  color: var(--gs-text-3);
+}
+.cat-chip {
+  font-size: 13px;
+  color: var(--gs-text-2);
+  background: var(--gs-bg-card);
+  border: 1px solid var(--gs-border);
+  border-radius: 999px;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cat-chip i {
+  font-style: normal;
+  color: var(--gs-text-3);
+  margin-left: 4px;
+  font-size: 12px;
+}
+.cat-chip:hover {
+  color: var(--gs-primary);
+  border-color: var(--gs-primary);
+  background: color-mix(in srgb, var(--gs-primary) 6%, #fff);
 }
 </style>

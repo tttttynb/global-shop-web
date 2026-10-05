@@ -11,6 +11,16 @@
           {{ $t('pay.payAmount') }}<span class="amount-num">{{ localeStore.formatPrice(orderAmount) }}</span>
         </div>
 
+        <!-- 🚚 收货地址卡（京东式：支付前确认寄往何处） -->
+        <div class="ship-address" v-if="shipAddress">
+          <el-icon class="sa-icon"><Location /></el-icon>
+          <div class="sa-body">
+            <p class="sa-line1"><b>{{ shipAddress.receiverName }}</b> {{ shipAddress.receiverPhone }}</p>
+            <p class="sa-line2">{{ shipAddress.receiverAddress }}</p>
+          </div>
+          <el-button size="small" text type="primary" @click="$router.push('/orders')">查看订单 ›</el-button>
+        </div>
+
         <!-- 🆕 金额明细：商品 + 国际运费 + 跨境税（Phase 3 - F6，结算金额与展示一致） -->
         <div class="amount-breakdown" v-if="goodsAmount !== null">
           <div class="bd-row">
@@ -108,7 +118,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { Money, SuccessFilled, WarningFilled } from '@element-plus/icons-vue'
+import { Money, SuccessFilled, WarningFilled, Location } from '@element-plus/icons-vue'
 import { getOrderDetail } from '@/api/order'
 import { createPayment, queryPaymentStatus, getPaymentChannels, rechargeBalance } from '@/api/payment'
 import { useLocaleStore } from '@/stores/locale'
@@ -119,6 +129,7 @@ const { t } = useI18n()
 const localeStore = useLocaleStore()
 
 const orderId = ref(route.params.id)
+const shipAddress = ref(null)
 const orderAmount = ref(0)
 const userBalance = ref(null)
 const channels = ref([])
@@ -148,7 +159,7 @@ const balanceSufficient = computed(() => {
 })
 
 onMounted(async () => {
-  // 1. 加载订单金额（含运费/税费明细）
+  // 1. 加载订单金额（含运费/税费明细）+ 收货地址快照
   try {
     const res = await getOrderDetail(orderId.value)
     if (res.data) {
@@ -156,6 +167,14 @@ onMounted(async () => {
       shippingFee.value = Number(res.data.shippingFee) || 0
       taxFee.value = Number(res.data.taxFee) || 0
       discountAmount.value = Number(res.data.discountAmount) || 0
+      // 🚚 收货地址卡（结算时快照进订单）
+      if (res.data.receiverName) {
+        shipAddress.value = {
+          receiverName: res.data.receiverName,
+          receiverPhone: res.data.receiverPhone,
+          receiverAddress: res.data.receiverAddress
+        }
+      }
     }
   } catch (e) {
     ElMessage.error(t('messages.orderInfoFailed'))
@@ -522,5 +541,31 @@ async function handleRecharge() {
 .pg-sub {
   font-size: 12px;
   color: var(--gs-text-3);
+}
+
+/* 🚚 收货地址卡 */
+.ship-address {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gs-bg-hover);
+  border-radius: var(--gs-radius);
+  padding: 10px 14px;
+  margin: 14px 0;
+  text-align: left;
+}
+.sa-icon { color: var(--gs-primary); font-size: 18px; flex-shrink: 0; }
+.sa-body { flex: 1; min-width: 0; }
+.sa-line1 {
+  font-size: 13px;
+  color: var(--gs-text-1);
+  margin-bottom: 2px;
+}
+.sa-line2 {
+  font-size: 12px;
+  color: var(--gs-text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

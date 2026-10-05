@@ -37,6 +37,27 @@
         </div>
       </el-card>
 
+      <!-- 🚚 收货地址（京东式结算：先选地址再结算） -->
+      <div class="addr-bar" v-if="cartList.length">
+        <el-icon class="addr-icon"><Location /></el-icon>
+        <template v-if="addresses.length">
+          <el-select v-model="selectedAddressId" class="addr-select" placeholder="选择收货地址">
+            <el-option
+              v-for="a in addresses"
+              :key="a.id"
+              :value="a.id"
+              :label="`${a.receiverName} ${a.phone}｜${a.province}${a.city}${a.district}${a.detailAddress}${a.isDefault ? '（默认）' : ''}`"
+            />
+          </el-select>
+          <router-link to="/profile" class="addr-manage">管理地址</router-link>
+          <el-button size="small" text type="primary" @click="showAddrDialog = true">+ 新增地址</el-button>
+        </template>
+        <template v-else>
+          <span class="addr-none">还没有收货地址，结算前请先新增一个</span>
+          <el-button size="small" type="primary" @click="showAddrDialog = true">+ 新增收货地址</el-button>
+        </template>
+      </div>
+
       <!-- 🚚 凑单免运费进度（淘宝/京东式闭环提示，规则：满¥199包邮） -->
       <div class="free-ship-progress" v-if="totalAmount < 199">
         <span class="fsp-text">🚚 再买 <b>{{ localeStore.formatPrice(199 - totalAmount) }}</b> 免国际运费</span>
@@ -71,6 +92,27 @@
     <el-empty v-else :description="$t('cart.empty')">
       <el-button type="primary" @click="$router.push('/products')">{{ $t('cart.goShopping') }}</el-button>
     </el-empty>
+
+    <!-- 新增收货地址弹窗 -->
+    <el-dialog v-model="showAddrDialog" title="新增收货地址" width="460px" align-center>
+      <el-form :model="addrForm" label-width="80px">
+        <el-form-item label="收货人"><el-input v-model="addrForm.receiverName" placeholder="姓名" /></el-form-item>
+        <el-form-item label="手机号"><el-input v-model="addrForm.phone" placeholder="联系电话" /></el-form-item>
+        <el-form-item label="所在地区">
+          <div class="addr-region">
+            <el-input v-model="addrForm.province" placeholder="省" />
+            <el-input v-model="addrForm.city" placeholder="市" />
+            <el-input v-model="addrForm.district" placeholder="区/县" />
+          </div>
+        </el-form-item>
+        <el-form-item label="详细地址"><el-input v-model="addrForm.detailAddress" placeholder="街道、门牌号" /></el-form-item>
+        <el-form-item label=" "><el-checkbox v-model="addrForm.isDefault">设为默认地址</el-checkbox></el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showAddrDialog = false">取消</el-button>
+        <el-button type="primary" :loading="addrSaving" @click="handleAddAddress">保存并使用</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -79,9 +121,10 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
-import { Delete, Shop, Picture } from '@element-plus/icons-vue'
+import { Delete, Shop, Picture, Location } from '@element-plus/icons-vue'
 import { getCartList, removeCartItem, updateCartItem } from '@/api/cart'
 import { checkoutCart } from '@/api/order'
+import { getAddressList, addAddress } from '@/api/user'
 import { getPointsSummary, previewDeduction } from '@/api/points'
 import { useCartStore } from '@/stores/cart'
 import { useLocaleStore } from '@/stores/locale'
@@ -156,10 +199,53 @@ async function handleUpdateQty(cartItemId, quantity) {
   }
 }
 
+// 🚚 收货地址（京东式结算：先选地址再结算，快照写入订单）
+const addresses = ref([])
+const selectedAddressId = ref(null)
+const showAddrDialog = ref(false)
+const addrSaving = ref(false)
+const addrForm = ref({ receiverName: '', phone: '', province: '', city: '', district: '', detailAddress: '', isDefault: false })
+
+async function loadAddresses() {
+  try {
+    const res = await getAddressList()
+    addresses.value = res.data || []
+    const def = addresses.value.find(a => a.isDefault) || addresses.value[0]
+    if (def) selectedAddressId.value = def.id
+  } catch {}
+}
+
+async function handleAddAddress() {
+  const f = addrForm.value
+  if (!f.receiverName || !f.phone || !f.detailAddress) {
+    ElMessage.warning('请填写收货人、手机号和详细地址')
+    return
+  }
+  addrSaving.value = true
+  try {
+    const res = await addAddress(f)
+    ElMessage.success('地址已保存')
+    showAddrDialog.value = false
+    await loadAddresses()
+    if (res.data?.id) selectedAddressId.value = res.data.id
+    addrForm.value = { receiverName: '', phone: '', province: '', city: '', district: '', detailAddress: '', isDefault: false }
+  } catch (e) {
+    ElMessage.error(e.message || '保存失败')
+  } finally {
+    addrSaving.value = false
+  }
+}
+
 async function handleCheckout() {
+  // 闭环：结算必须有收货地址，没有就引导新增
+  if (!selectedAddressId.value) {
+    ElMessage.warning('请先选择或新增收货地址')
+    showAddrDialog.value = true
+    return
+  }
   checkingOut.value = true
   try {
-    const res = await checkoutCart(usePoints.value)
+    const res = await checkoutCart(usePoints.value, selectedAddressId.value)
     const orderId = res.data
     ElMessage.success(t('messages.orderSuccess'))
     cartStore.setCount(0)
@@ -208,6 +294,7 @@ watch(totalAmount, () => refreshDeductionPreview())
 onMounted(() => {
   fetchCart()
   loadPointsSummary()
+  loadAddresses()
 })
 </script>
 
@@ -319,6 +406,44 @@ onMounted(() => {
   color: #e6323e;
   min-width: 90px;
   text-align: right;
+}
+
+/* 收货地址栏（京东式结算第一步） */
+.addr-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--gs-bg-card);
+  border: 1px solid color-mix(in srgb, var(--gs-primary) 18%, #fff);
+  border-radius: var(--gs-radius);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.addr-icon {
+  color: var(--gs-primary);
+  font-size: 18px;
+}
+.addr-select {
+  flex: 1;
+  min-width: 0;
+  max-width: 560px;
+}
+.addr-select :deep(.el-select__wrapper) {
+  border-radius: var(--gs-radius-sm);
+}
+.addr-manage {
+  font-size: 13px;
+  color: var(--gs-primary);
+  white-space: nowrap;
+}
+.addr-none {
+  font-size: 13px;
+  color: var(--gs-text-2);
+}
+.addr-region {
+  display: flex;
+  gap: 8px;
+  width: 100%;
 }
 
 /* 凑单免运费进度 */

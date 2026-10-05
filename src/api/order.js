@@ -8,9 +8,12 @@ export function getMyOrders() {
   return request.get('/order/my')
 }
 
-/** 购物车结算；usePoints=true 时启用积分抵扣（Phase 4 - F8） */
-export function checkoutCart(usePoints = false) {
-  return request.post('/order/checkout', null, { params: usePoints ? { usePoints: true } : {} })
+/** 购物车结算；usePoints=true 启用积分抵扣；addressId=收货地址（缺省取默认地址） */
+export function checkoutCart(usePoints = false, addressId = null) {
+  const params = {}
+  if (usePoints) params.usePoints = true
+  if (addressId) params.addressId = addressId
+  return request.post('/order/checkout', null, { params })
 }
 
 export function payOrder(id) {
