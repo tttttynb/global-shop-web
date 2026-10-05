@@ -11,12 +11,15 @@
     <AppFooter />
     <!-- 长页面回到顶部 -->
     <el-backtop :right="28" :bottom="28" />
+    <!-- 全站 AI 客服悬浮球（/ai/chat 页自身隐藏） -->
+    <AiAssistantDock />
   </div>
 </template>
 
 <script setup>
 import AppHeader from '@/components/AppHeader.vue'
 import AppFooter from '@/components/AppFooter.vue'
+import AiAssistantDock from '@/components/AiAssistantDock.vue'
 </script>
 
 <style scoped>
